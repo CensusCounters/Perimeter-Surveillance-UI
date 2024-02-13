@@ -23,7 +23,14 @@
 		canvas.style.width = "1000px";
 		canvas.style.height = "500px";
 		var context = canvas.getContext('2d');
-		context.clearRect(0, 0, canvas.width, canvas.height);
+		
+		var image = new Image();
+		image.onload = function () {
+			// Clear the canvas
+			context.clearRect(0, 0, canvas.width, canvas.height);
+		};
+		image.src = "{{ url_for('view_camera') }}";
+
 		context.font = "20px Arial";
 		context.fillText("Loading Image.......", 60, 80);
 	});
