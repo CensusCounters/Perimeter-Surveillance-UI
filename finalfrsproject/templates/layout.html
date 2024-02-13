@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Automatic Visitor and Vehicle Recognition System</title>
+
+    <meta charset="UTF-8">
+		<meta name="description" content="Census smart counter">
+		<meta name="keywords" content="Census smart counter">
+		<meta name="author" content="Census smart counter">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!--css-->
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet" type="text/css" />
+    <link href="{{ url_for('static', filename='css/dataTables.bootstrap.css') }}" rel="stylesheet" type="text/css" />
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet" type="text/css">
+    <link href="{{ url_for('static', filename='css/media.css') }}" rel="stylesheet" type="text/css">
+    <link href="{{ url_for('static', filename='css/font-awesome.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/jquery-ui.css') }}" rel="stylesheet" type="text/css"> 
+    <link href="{{ url_for('static', filename='css/daterangepicker.css') }}" rel="stylesheet" type="text/css"> 
+
+
+		<!--images-->
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon-32x32.png') }}" sizes="32x32" />
+    
+    <!--js-->
+    <script src="{{ url_for('static', filename='js/jQuery-2.1.4.min.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='js/jquery.validate.min.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='js/jquery-ui.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='js/moment.min.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='js/daterangepicker.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='js/fabric.min.js') }}" type="text/javascript"></script>
+    <!--<script src="{{ url_for('static', filename='js/face-api.min.js') }}" type="text/javascript"></script>-->
+  
+    
+    
+  </head>
+
+  <body class="skin-blue sidebar-mini ">
+  	<div class="row show-mood">
+      <div class="col-md-12" id="img-vg-content">
+	      <div class="col-md-4">
+	        <div class="display-date" style="margin-top:30px; text-align: center;">
+	            {% if details.logged_in_user %}
+	              <span id="details_entered_by">Logged In User: {{ details.logged_in_user }}</span>
+	            {% endif %}
+	        </div>
+	      </div>
+	      <div class="col-md-4">
+	      	<div class="display-date" style="margin-top:30px;">  
+	     			<span class="display-time"></span>, 
+  				  <span id="day">day</span>,
+					  <span id="daynum">00</span>
+					  <span id="month">month</span>
+					  <span id="year">0000</span>
+      		</div>
+      	</div>
+	      <div class="col-md-1"></div>
+	      <div class="col-md-1">
+	        <div style="margin-top:30px;text-align:center;font-size:2rem;font-weight: 200;">
+	          {% if details.logged_in_user %}
+	            <a href="{{ url_for('home') }}" style="text-decoration: underline;">Home</a>  
+	          {% endif %}
+	        </div>
+	      </div>
+	      <div class="col-md-1">
+	        <div style="margin-top:30px;text-align:center;font-size:2rem;font-weight: 200;">
+	          {% if details.logged_in_user %}
+	            <a href="{{ url_for('logout') }}" style="text-decoration: underline;">Logout</a>  
+	          {% endif %}
+	        </div>
+	      </div>
+    	</div>
+    </div>
+		<!-- <%@ include file="/WEB-INF/census_menu.jsp" %> -->
+    {% if details.message %}
+    <div class="row show-mood">
+	   	<div class="col-md-12" id="img-vg-content">
+    		<div class="col-md-1"></div>
+				<div class="col-md-10" style="margin-top:15px; margin-bottom: 15px; text-align: center">
+    			<div class="title-message-header">
+	    			<h3 id="title" style="color: #ffd868">{{ details.page_title }}: </h3>
+	    			{% if details.page_title == 'Error' %}
+	    			<h3 id="message" style="color: #fa0202">{{ details.message }}</h3>
+						{% elif details.success_font %}
+						<h3 id="message" style="color: #00ff00">{{ details.message }}</h3>
+	    			{% else %}
+						<h3 id="message" style="color: #dddddd">{{ details.message }}</h3>
+	    			{% endif %}
+	    		</div>
+     		</div>
+     		<div class="col-md-1"></div>	
+    	</div>
+    </div>
+    {% endif %}
+
+		{% block content %}
+
+
+		{% endblock %}
+
+    <script>
+      const displayTime = document.querySelector(".display-time");
+			// Time
+			function showTime() {
+			  let time = new Date();
+			  displayTime.innerText = time.toLocaleTimeString("en-US", { hour12: true });
+			  setTimeout(showTime, 1000);
+			}
+
+			showTime();
+
+			// Date
+			function updateDate() {
+			  let today = new Date();
+
+			  // return number
+			  let dayName = today.getDay(),
+			    dayNum = today.getDate(),
+			    month = today.getMonth(),
+			    year = today.getFullYear();
+
+			  const months = [
+			    "January",
+			    "February",
+			    "March",
+			    "April",
+			    "May",
+			    "June",
+			    "July",
+			    "August",
+			    "September",
+			    "October",
+			    "November",
+			    "December",
+			  ];
+			  const dayWeek = [
+			    "Sunday",
+			    "Monday",
+			    "Tuesday",
+			    "Wednesday",
+			    "Thursday",
+			    "Friday",
+			    "Saturday",
+			  ];
+			  // value -> ID of the html element
+			  const IDCollection = ["day", "daynum", "month", "year"];
+			  // return value array with number as a index
+			  const val = [dayWeek[dayName], dayNum, months[month], year];
+			  for (let i = 0; i < IDCollection.length; i++) {
+			    document.getElementById(IDCollection[i]).firstChild.nodeValue = val[i];
+			  }
+			}
+			updateDate();
+    
+      function preventBack() { 
+        window.history.forward();  
+      } 
+          
+      setTimeout("preventBack()", 0); 
+        
+      window.onunload = function () { null }; 
+
+    </script>
+
+   </body>
+</html>

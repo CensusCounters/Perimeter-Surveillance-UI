@@ -1,0 +1,101 @@
+{% extends "layout.html" %}
+{% block content %}
+  <section class="user vehicle_detail_section" style="padding-top:2em">
+    <div class="container">
+      <form id="form" action="{{ url_for('edit_camera_details') }}" class="login" method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="camera_id" value="{{ details.camera_id }}">
+        <div class="row" id="img-vg-content-1">
+            <div class="col-md-6">
+              <div class="form-group col-md-12">
+                <select name="camera_make" id="camera_make" class="form-control required">
+                  <option value="">Camera Make</option>
+                  <option value="HikVision">HikVision</option>
+                  <option value="CPPlus">CPPlus</option>
+                  <option value="Dahua">Dahua</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div class="form-group col-md-12">
+                <input id="camera_ip_address" name="camera_ip_address" type="text" class="form-control required" placeholder="Enter the Camera IP" value="Camera IP - {{ details.camera_ip_address }}">
+              </div>
+              <div class="form-group col-md-12">
+                <input id="camera_username" name="camera_username" type="text" class="form-control" placeholder="Enter the username for the camera" value="Camera Username - {{ details.camera_username }}">
+              </div>
+              <div class="form-group col-md-12">
+                <input id="camera_password" name="camera_password" type="text" class="form-control" placeholder="Enter the password for the camera" value="Camera Password - {{ details.camera_password }}">
+              </div>
+              <div class="form-group col-xs-12">
+                <input id="camera_rtsp_address" name="camera_rtsp_address" type="text" class="form-control" placeholder="Enter the rtsp address for the camera" value="Camera RTSP - {{ details.camera_rtsp_address }}" readonly>
+              </div>
+            </div>
+        </div>
+        <div class="row" id="img-vg-content-2">
+          <div class="col-xs-6 buttons text-center">
+            <button type="button" id="submit_form" name="submit_form" value="submit_form" class="c-btn" style="width:75%">Save Changes</button>
+          </div>
+        </div>
+        <div class="row" id="img-vg-content-3">
+          <div class="col-xs-6 buttons text-center">
+            <button type="button" id="continue" name="continue" value="continue" class="c-btn" style="width:75%">Continue</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </section>
+  <script>
+    $(document).ready(function(){
+        {% if details.camera_type %}
+	        document.getElementById("camera_type").value = "{{ details.camera_make }}"
+	    {% endif %}
+
+      $.validator.addMethod('IP4Checker', function(value) {
+          return value.match(/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/);
+      }, 'Invalid IP address');
+
+      $(document).keypress(function(e) {
+        if(e.which == 13) {
+          $("#submit_form").trigger("click");
+        }
+      });
+      $("#submit_form").click(function() {
+        if($('#form').valid()) {
+          form.submit();
+        }
+      });
+      $(document).keypress(function(e) {
+        if(e.which == 13) {
+          $("#continue").trigger("click");
+        }
+      });
+      $("#continue").click(function() {
+          form.submit();
+      });
+
+      $("#form").validate({
+        errorPlacement: function (error, element){
+          element.before(error);
+        },
+        rules: {
+          camera_ip_address: {
+            required : true,
+            IP4Checker: true
+          },
+          camera_make: {
+            required : true
+          },
+          camera_username: {
+              required : true
+          },
+          camera_password: {
+              required : true
+          },
+          camera_rtsp_address: {
+              required : true
+          },
+
+        }
+      });
+    });
+  </script>
+{% endblock content %}

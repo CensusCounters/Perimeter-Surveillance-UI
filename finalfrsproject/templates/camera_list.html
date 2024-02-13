@@ -1,0 +1,55 @@
+{% extends "layout.html" %}
+{% block content %}
+<section class="user_vehicle_section">
+    <form id="edit_camera_form" action="{{ url_for('list_camera') }}" method="post" class="login">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="table-responsive" style="width: 90%; margin:0 auto">
+            <table class="table table-striped dataTables-example dataTable" id="camera-list">
+                <thead>
+                    <tr>
+                        <th>Camera Make</th>
+                        <th>Camera IP Address</th>
+                        <th>Camera Username</th>
+                        <th>Camera Password</th>
+                        <th>Camera RTSP Address</th>
+                        <th>Camera Region of Interest</th>
+                        <th>Associated AI Services</th>
+                        <th>Click here to edit settings</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% if details.camera_list %}
+                    {% for camera in details.camera_list %}
+                    <tr>
+                        <td width="5%">{{ camera.camera_make }}</td>
+                        <td width="8%">{{ camera.camera_ip_address }}</td>
+                        <td width="5%">{{ camera.camera_username }}</td>
+                        <td width="5%">{{ camera.camera_password }}</td>
+                        <td width="20%">{{ camera.camera_rtsp_address }}</td>
+                        <td width="20%">{{ camera.camera_region_of_interest }}</td>
+                        <td width="20%">{{ camera.camera_associated_services }}</td>
+                        <td width="17%">
+                            <button type="button" class="btn btn-primary" style="height: 80%; width:80%; font-size: 14px;" onclick="editCamera('{{ camera.camera_id}}')">Edit
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </form>
+</section>
+
+<script>
+        function editCamera(camera_id) {
+            var form_element = document.getElementById('edit_camera_form');
+            var hidden_var = document.createElement('input');
+            hidden_var.type = 'hidden';
+            hidden_var.name = 'camera_id';
+            hidden_var.value = camera_id;
+            form_element.appendChild(hidden_var);
+           form_element.submit();
+        }
+</script>
+{% endblock content %}

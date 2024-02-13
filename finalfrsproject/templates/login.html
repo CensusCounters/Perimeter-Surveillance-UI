@@ -1,0 +1,43 @@
+{% extends "layout.html" %}
+{% block content %}
+  <section class="user login_section" style="padding-top:2em">
+    <form id="form" action="{{ url_for('login') }}" class="login" method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="form-group col-md-8" style="width:100%;text-align:center !important;">
+        <input id="username" name="username" type="text" class="form-control" placeholder="Enter your username" value="Tushar Khichariya">
+      </div>
+      <div class="form-group col-md-8" style="width:100%;text-align: center;">
+        <input id="password" name="password" type="password" class="form-control required" placeholder="Enter your password" value="password">
+      </div>
+      <div class="col-xs-12 buttons text-center">
+        <button type="button" id = "login" class="c-btn" style="width: 100%;">Login</button>
+      </div>
+    </form>
+  </section>
+  
+  
+  <script>
+  $(document).ready(function(){
+    $(document).keypress(function(e) {
+      if(e.which == 13) {
+      	$("#login").trigger("click");
+      }
+    });
+    $("#form").validate({
+      errorPlacement: function (error, element){ 
+        element.before(error);
+      },
+      rules: {
+        username: "required",
+        password: "required",
+      }
+    });
+    $("#login").click(function() {
+      if($('#form').valid()) {
+      	form.submit();
+    		document.getElementById('spinner-parent').style.display='block';
+      }	
+    });
+  });
+</script>
+{% endblock content %}

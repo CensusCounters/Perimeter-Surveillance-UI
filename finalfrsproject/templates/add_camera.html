@@ -1,0 +1,72 @@
+{% extends "layout.html" %}
+{% block content %}
+  <section class="user user_register_section" style="padding-top:2em">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="row" id="img-vg-content">
+      <div class="col-md-6">
+        <div class="user-form">
+          <form id="form" action="{{ url_for('add_camera') }}" class="login" method="post">
+            <div class="form-group col-md-12">
+              <select name="camera_type" id="camera_type" class="form-control required">
+                <option value="">Camera Type</option>
+                <option value="HikVision">HikVision</option>
+                <option value="CPPlus">CPPlus</option>
+                <option value="Dahua">Dahua</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="form-group col-md-12">
+              <input id="camera_ip" name="camera_ip" type="text" class="form-control required" placeholder="Enter the Camera IP">
+            </div>
+            <div class="form-group col-md-12">
+              <input id="camera_username" name="camera_username" type="text" class="form-control" placeholder="Enter the username for the camera">
+            </div>
+            <div class="form-group col-md-12">
+              <input id="camera_password" name="camera_password" type="text" class="form-control" placeholder="Enter the password for the camera">
+            </div>
+            <div class="col-xs-12 buttons text-center">
+              <button type="button" id="submit_form" class="c-btn" style="width:75%">Submit</button>
+            </div>
+          </form>
+        </div>
+      </div>
+  	</div>
+  </section>
+  <script>
+    $(document).ready(function(){
+      $.validator.addMethod('IP4Checker', function(value) {
+          return value.match(/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/);
+      }, 'Invalid IP address');
+      $(document).keypress(function(e) {
+        if(e.which == 13) {
+          $("#submit_form").trigger("click");
+        }
+      });
+      $("#submit_form").click(function() {
+        if($('#form').valid()) {
+          form.submit();
+        }
+      });
+      $("#form").validate({
+        errorPlacement: function (error, element){
+          element.before(error);
+        },
+        rules: {
+          camera_ip: {
+            required : true,
+            IP4Checker: true
+          },
+          camera_type: {
+            required : true
+          },
+          camera_username: {
+              required : true
+          },
+          camera_password: {
+              required : true
+          }
+        }
+      });
+    });
+  </script>
+{% endblock content %}

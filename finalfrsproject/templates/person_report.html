@@ -1,0 +1,171 @@
+{% extends "layout.html" %}
+{% block content %}
+<section class="user_vehicle_section">
+    <form id="form" name="form" method="POST" action="{{ url_for('person_report') }}" method="post" class="login">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" id="start_date" name="start_date">
+        <input type="hidden" id="end_date" name="end_date">
+        <input type="hidden" id="report" name="report" value="person_report">
+        <div id="img-vg-content" style="text-align: center;">
+            <div class="col-xs-12" >
+                <div class="searchbar-box">
+                    <label>Report Date Range: </label>
+                    <input type="text" class="form-control" id="date_input" name="date_input" style="width:50%; background: #000000; color: #fff; text-align: center; border: 1px solid#00ffe4; font-size: 18px;">
+                </div>
+            </div>
+            <button type="submit" id = "sbmt_button" name="sbmt_button" class="c-btn">Submit</button>
+        </div>
+    </form>
+    <div id="img-vg-content">
+        <div class="table-responsive">
+            <table class="table table-striped dataTables-example dataTable" style="width: 90%; margin:0 auto">
+                <thead>
+                    <tr>
+                        <th>Person Name</th>
+                        <th>Fathers Name</th>
+                        <th>Resident Of</th>
+                        <th>Vehicle Plate Number</th>
+                        <th>Traveler Type</th>
+                        <th>Aadhar Number</th>
+                        <th>Driver's License Number</th>
+                        <th>Entry Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% if details.person_report_list %}
+                    {% for person in details.person_report_list %}
+                    <tr>
+                        {% if person.person_name %}
+                            <td><a href="javascript:show_modal('{{ person.person_name }}','{{ person.person_image }}')">{{ person.person_name }}</a></td>
+                        {% else %}
+                            <td>No records found</td>
+                        {% endif %}
+                        <td>{{ person.fathers_name }}</td>
+                        <td>{{ person.resident_of }}</td>
+                        <td>{{ person.vehicle_plate_number }}</td>
+                        <td>{{ person.traveler_type }}</td>
+                        {% if person.aadhar_number %}
+                            <td><a href="javascript:show_modal('{{ person.aadhar_number }}','{{ person.aadhar_image }}')">{{ person.aadhar_number }}</a></td>
+                        {% else %}
+                            <td>No records found</td>
+                        {% endif %}
+                        {% if person.drivers_license %}
+                            <td><a href="javascript:show_modal('{{ person.drivers_license }}','{{ person.drivers_license_image }}')">{{ person.drivers_license }}</a></td>
+                        {% else %}
+                            <td>No records found</td>
+                        {% endif %}
+                        <td>{{ person.entry_time }}</td>
+                        
+                    </tr>
+                    {% endfor %}
+                    
+                </tbody>
+            </table>
+        </div>
+        
+        {% endif %}
+        <!-- The Modal -->
+        <div id="myModal" class="modal">
+            <!-- The Close Button -->
+            <span class="close">&times;</span>
+
+            <!-- Modal Content (The Image) -->
+            <img class="modal-content" id="img01">
+
+            <!-- Modal Caption (Image Text) -->
+            <div id="caption"></div>
+        </div>
+    </div>
+    <div style="text-align: center; margin-top: 50px" >
+        <button type="button" id = "download" name="download" class="c-btn">Download CSV</button>
+    </div>
+</section>
+
+<script>
+
+    function show_modal(vehicle_plate_number, vehicle_image) {
+        
+       // Get the modal
+        var modal = document.getElementById("myModal");
+
+        // Get the image and insert it inside the modal - use its "alt" text as a caption
+        //var img = document.getElementById("myImg");
+        var modalImg = document.getElementById("img01");
+        modalImg.src = vehicle_image;
+        var captionText = document.getElementById("caption");
+       //#img.onclick = function(){
+        modal.style.display = "block";
+        
+        captionText.innerHTML = vehicle_plate_number//this.alt;
+        //}
+
+        // Get the <span> element that closes the modal
+        var span = document.getElementsByClassName("close")[0];
+
+        // When the user clicks on <span> (x), close the modal
+        span.onclick = function() {
+            modal.style.display = "none";
+        }
+    }
+
+$(document).ready(function(){
+    let start_date = null
+    let end_date = null
+    $('#date_input').daterangepicker();
+    {% if details.start_date %}
+        start_date = '{{ details.start_date}}';
+        $("#start_date").val(start_date);
+        $('#date_input').data('daterangepicker').setStartDate(moment(start_date));
+    {% else %}  
+        $('#date_input').data('daterangepicker').setStartDate(moment());
+        start_date = moment().startOf('day').format('YYYY-MM-DD HH:mm:ss')
+        $("#start_date").val(start_date);
+        
+    {% endif %}
+    {% if details.end_date %}
+        end_date = '{{ details.end_date}}';
+        $('#date_input').data('daterangepicker').setEndDate(moment(end_date));
+        $("#end_date").val(end_date);
+    {% else %}  
+        $('#date_input').data('daterangepicker').setEndDate(moment());
+        end_date = moment().endOf('day').format('YYYY-MM-DD HH:mm:ss')
+        $("#end_date").val(end_date);
+    {% endif %}
+    
+    $('#date_input').daterangepicker({
+      // options here
+        ranges: {
+             'Today': [moment(), moment()],
+             'Yesterday': [moment().subtract(1,'days'), moment().subtract(1,'days')],
+             'Last 7 Days': [moment().subtract(6,'days'), moment()],
+             'Last 30 Days': [moment().subtract(29,'days'), moment()],
+             'This Month': [moment().startOf('month'), moment().endOf('month')],
+             'Last Month': [moment().subtract(1,'month').startOf('month'), moment().subtract(1,'month').endOf('month')]
+           },
+        timePicker:false,
+        autoApply:true,
+    },function(start, end, label) {
+        start_date = moment(start).startOf('day').format('YYYY-MM-DD HH:mm:ss');
+        end_date = moment(end).endOf('day').format('YYYY-MM-DD HH:mm:ss');
+        $("#start_date").val(start_date)
+        $("#end_date").val(end_date)
+    });
+    $(document).keypress(function(e) {
+        if(e.which == 13) {
+            $("#download").trigger("click");
+        }
+    });
+    $("#download").click(function() {
+       $('#form').attr('action', '{{ url_for('download_report') }}');
+        form.submit();
+    });
+
+
+
+});
+
+
+
+
+</script>
+{% endblock content %}

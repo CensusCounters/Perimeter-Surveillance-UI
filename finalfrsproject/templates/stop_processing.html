@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+{% block content %}
+  <section class="user user_register_section">
+      <form id="form" action="{{ url_for('stop_processing') }}" class="login" method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="col-xs-12 buttons text-center">
+          <button type="submit" id = "login" class="btn btn-primary">Continue</button>
+        </div>
+      </form>
+  </section>
+
+{% endblock content %}

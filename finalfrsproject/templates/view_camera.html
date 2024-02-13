@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+{% block content %}
+<section class="recognize_section" id="recognize_section">
+	<form id="form" action="{{ url_for('view_camera') }}" method="post" enctype="multipart/form-data">
+		<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+		<div class="row" id="img-vg-content_1">
+			<div class="wbcam-col">
+				<div class="webcam_div" style="text-align: center; border: 3px solid #f29d0a;width:100%">
+					<canvas id="canvas_picture" style="width:1000px; height:500px; object-fit: cover; background-image: url({{ url_for('view_camera') }})"></canvas>
+				</div>
+			</div>
+		</div>
+		<div class="row" id="img-vg-content_2" style="margin-top:40px">
+			<div class="col-xs-12 buttons text-center">
+				<button type="submit" id="continue" name="continue" value="continue" class="c-btn" style="width:75%">Continue</button>
+			</div>
+		</div>
+	</form>
+</section>
+<script>
+	$(document).ready(function(){
+		const canvas = document.getElementById("canvas_picture");
+		canvas.style.width = "1000px";
+		canvas.style.height = "500px";
+		var context = canvas.getContext('2d');
+		context.clearRect(0, 0, canvas.width, canvas.height);
+		context.font = "20px Arial";
+		context.fillText("Loading Image.......", 60, 80);
+	});
+</script>
+{% endblock content %}
