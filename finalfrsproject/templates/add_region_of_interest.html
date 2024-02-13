@@ -69,6 +69,14 @@
 			width:"1000",
 			height: "500"
 		})
+
+		// Path to your custom pencil brush cursor image
+		var pencilCursorUrl = '/static/images/brush.png';
+
+		// Apply the custom cursor
+		fabric_canvas.defaultCursor = `url(${pencilCursorUrl}), auto`;
+		fabric_canvas.hoverCursor = `url(${pencilCursorUrl}), auto`;
+		
 		fabric_canvas.setBackgroundImage(image_html_path, fabric_canvas.renderAll.bind(fabric_canvas), {
 			backgroundImageOpacity: 1,
 			backgroundImageStretch: false,
