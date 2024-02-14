@@ -51,6 +51,7 @@
 		$("#img-vg-content_6").hide();
 
 		var image_html_path = "{{ details.image }}"
+		// var image_html_path = "/static/images/uploads/frame.jpg"
 		console.log("image path: ", image_html_path)
 		var canvas = document.getElementById("canvas_picture");
 		canvas.style.width = "1000px";
@@ -72,10 +73,6 @@
 
 		// Path to your custom pencil brush cursor image
 		var pencilCursorUrl = '/static/images/brush.png';
-
-		// Apply the custom cursor
-		fabric_canvas.defaultCursor = `url(${pencilCursorUrl}), auto`;
-		fabric_canvas.hoverCursor = `url(${pencilCursorUrl}), auto`;
 		
 		fabric_canvas.setBackgroundImage(image_html_path, fabric_canvas.renderAll.bind(fabric_canvas), {
 			backgroundImageOpacity: 1,
@@ -88,7 +85,14 @@
 		mouse_down = false;
 		draw_line_button.addEventListener('click',activate_draw_line);
 		function activate_draw_line() {
-			fabric_canvas.cursor = "pointer";
+			// fabric_canvas.cursor = "pointer";
+			
+			ShowAlertModel();
+			
+			// Apply the custom cursor
+			fabric_canvas.defaultCursor = `url(${pencilCursorUrl}), auto`;
+			fabric_canvas.hoverCursor = `url(${pencilCursorUrl}), auto`;
+			
 			$("#img-vg-content_2").hide();
 			$("#img-vg-content_3").hide();
 
@@ -96,6 +100,14 @@
 			fabric_canvas.on('mouse:move',draw_line);
 			fabric_canvas.on('mouse:up',end_line);
 			fabric_canvas.selection = false;
+		}
+		function ShowAlertModel() {
+			Swal.fire({
+				title: 'Info',
+				html: '<span style="font-size: 20px;">Drawing activated!</span>',
+				confirmButtonText: 'OK',
+				confirmButtonColor: '#3085d6',
+			});
 		}
 		function start_line(o) {
 			$("#img-vg-content_2").hide();
