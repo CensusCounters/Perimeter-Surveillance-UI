@@ -52,6 +52,7 @@
     }
     .swal2-styled.swal2-confirm {
         border: 1px solid #00B3A1 !important;
+		border-radius: 25px;
         color: black !important; /* For the button text color */
         background-color: #00B3A1 !important; /* Button background color */
 		font-weight: bold !important;
@@ -95,7 +96,7 @@
 		})
 
 		// Path to your custom pencil brush cursor image
-		var pencilCursorUrl = '/static/images/brush.png';
+		var pencilCursorUrl = '/static/images/brush_32.png';
 		
 		fabric_canvas.setBackgroundImage(image_html_path, fabric_canvas.renderAll.bind(fabric_canvas), {
 			backgroundImageOpacity: 1,
@@ -113,8 +114,8 @@
 			ShowAlertModel();
 			
 			// Apply the custom cursor
-			fabric_canvas.defaultCursor = `url(${pencilCursorUrl}), auto`;
-			fabric_canvas.hoverCursor = `url(${pencilCursorUrl}), auto`;
+			fabric_canvas.defaultCursor = `url(${pencilCursorUrl}) 16 32, auto`;
+			fabric_canvas.hoverCursor = `url(${pencilCursorUrl})16 32, auto`;
 			
 			$("#img-vg-content_2").hide();
 			$("#img-vg-content_3").hide();
