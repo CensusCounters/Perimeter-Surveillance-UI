@@ -1,5 +1,13 @@
 {% extends "layout.html" %}
 {% block content %}
+<div id="edit_tools" style="text-align:center; width:100%; margin-bottom:20px;">
+    <div style="display:inline-block; margin:0 auto;">
+        <button type="button" id="rectangle_button" name="rectangle_button" value="Rectangle" class="c-btn" style="width:200px; background:#0000ff; border-color:#0000ff; color:#ffffff; margin:5px;">Rectangle</button>
+        <button type="button" id="circle_button" name="circle_button" value="Circle" class="c-btn" style="width:200px; background:#0000ff; border-color:#0000ff; color:#ffffff; margin:5px;">Circle</button>
+        <button type="button" id="delete_button" name="delete_button" value="Delete" class="c-btn" style="width:200px; background:#0000ff; border-color:#0000ff; color:#ffffff; margin:5px;">Delete</button>
+        <button type="button" id="done_button" name="done_button" value="Done" class="c-btn" style="width:200px; background:#0000ff; border-color:#0000ff; color:#ffffff; margin:5px;">Done</button>
+    </div>
+</div>
 <section class="recognize_section" id="recognize_section">
 	<form id="form" action="{{ url_for('add_region_of_interest') }}" method="post" enctype="multipart/form-data">
 		<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -10,7 +18,7 @@
 				</div>
 			</div>
 		</div>
-		<div class="row" id="img-vg-content_2" style="margin-bottom:20px">
+				<div class="row" id="img-vg-content_2" style="margin-bottom:20px">
 			<div class="col-xs-12 buttons faceapi-button">
 				<button type="submit" id="continue" name="continue" value ="continue" class="c-btn">Continue without a Region of Interest</button>
 			</div>
@@ -73,6 +81,7 @@
 		$("#img-vg-content_4").hide();
 		$("#img-vg-content_5").hide();
 		$("#img-vg-content_6").hide();
+		$("#edit_tools").hide();
 
 		var image_html_path = "{{ details.image }}"
 		// var image_html_path = "/static/images/uploads/frame.jpg"
@@ -113,18 +122,70 @@
 			
 			ShowAlertModel();
 			
-			// Apply the custom cursor
-			fabric_canvas.defaultCursor = `url(${pencilCursorUrl}) 16 32, auto`;
-			fabric_canvas.hoverCursor = `url(${pencilCursorUrl})16 32, auto`;
+			// // Apply the custom cursor
+			// fabric_canvas.defaultCursor = `url(${pencilCursorUrl}) 16 32, auto`;
+			// fabric_canvas.hoverCursor = `url(${pencilCursorUrl})16 32, auto`;
 			
-			$("#img-vg-content_2").hide();
-			$("#img-vg-content_3").hide();
+			// $("#img-vg-content_2").hide();
+			// $("#img-vg-content_3").hide();
 
-			fabric_canvas.on('mouse:down',start_line);
-			fabric_canvas.on('mouse:move',draw_line);
-			fabric_canvas.on('mouse:up',end_line);
-			fabric_canvas.selection = false;
+			// fabric_canvas.on('mouse:down',start_line);
+			// fabric_canvas.on('mouse:move',draw_line);
+			// fabric_canvas.on('mouse:up',end_line);
+			// fabric_canvas.selection = false;
 		}
+		var rectangle_button = document.getElementById('rectangle_button');
+		rectangle_button.addEventListener('click',createRect);
+		var circle_button = document.getElementById('circle_button');
+		circle_button.addEventListener('click',createCircle);
+		var delete_button = document.getElementById('delete_button');
+		delete_button.addEventListener('click',deleteSelected);
+		var done_button = document.getElementById('done_button');
+		done_button.addEventListener('click',toJson);
+
+		function createRect() {
+            var rect = new fabric.Rect({
+                left: 100,
+                top: 100,
+                fill: 'transparent',
+                width: 100,
+                height: 100,
+				stroke: "blue",
+				strokeWidth: 2 
+            });
+            fabric_canvas.add(rect);
+        }
+
+		function createCircle() {
+            var circle = new fabric.Circle({
+                radius: 50,
+                fill: 'transparent',
+                left: 200,
+                top: 200,
+				stroke: "blue",
+				strokeWidth: 2
+            });
+            fabric_canvas.add(circle);
+        }
+
+        function deleteSelected() {
+            var activeObject = fabric_canvas.getActiveObject();
+            if (activeObject) {
+                fabric_canvas.remove(activeObject);
+            }
+        }
+
+		function toJson() {
+            var json = fabric_canvas.toJSON();
+            console.log(json);
+            // Implement saving or displaying the JSON string as needed
+        }
+
+        function fromJson() {
+            var json = '{}'; // Replace with your JSON string
+            canvas.loadFromJSON(json, canvas.renderAll.bind(canvas));
+        }
+
 		function ShowAlertModel() {
 			Swal.fire({
 				title: 'Info',
@@ -135,6 +196,11 @@
 					popup: 'my-popup-class',
 					confirmButton: 'my-confirm-button-class',
 					title: 'my-title-class',
+				}
+			}).then((result) => {
+				if (result.isConfirmed) {
+					console.log('OK button was clicked');
+					$("#edit_tools").show();
 				}
 			});
 		}
