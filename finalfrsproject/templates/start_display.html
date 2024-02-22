@@ -1,0 +1,79 @@
+{% extends "layout.html" %}
+{% block content %}
+<section class="recognize_section" id="recognize_section">
+	<form id="form" action="{{ url_for('start_display') }}" method="post" enctype="multipart/form-data">
+		<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="row" id="img-vg-content-0" style="text-align: center;">
+			<div class="col-xs-2"></div>
+			<div class="col-xs-8">
+                <select name="camera_rtsp_address" id="camera_rtsp_address" class="form-control" required>
+                    <option value="" style="text-align: center;">Camera IP Address</option>
+		             {% for camera in details.rtsp_list %}
+                        <option id="{{ camera.camera_ip_address }}" value="{{ camera.camera_rtsp_address }} - {{ camera.camera_ip_address }} "> {{ camera.camera_ip_address }} </option>
+                      {% endfor %}
+                </select>
+            </div>
+			<div class="col-xs-2"></div>
+        </div>
+		<div class="row" id="img-vg-content_1" style="margin-top:30px">
+			<div class="wbcam-col">
+				<div class="webcam_div" style="text-align: center; border: 3px solid #f29d0a; width:100%">
+					<canvas id="canvas_picture" style="width:1000px; height:500px; object-fit: cover; background-image: url({{ url_for('live_streaming') }})"></canvas>
+					<div id="spinner" style="position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%);">
+						<div class="css-spinner"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="row" id="img-vg-content_2" style="margin-top:40px">
+			<div class="col-xs-12 buttons text-center">
+				<button type="submit" id="continue" name="continue" value="continue" class="c-btn" style="width:75%">Continue</button>
+			</div>
+		</div>
+	</form>
+</section>
+<script>
+	function set_rtsp(rtsp_address) {
+		alert("here")
+		const canvas = document.getElementById("canvas_picture");
+		canvas.style.width = "1000px";
+		canvas.style.height = "500px";
+		var context = canvas.getContext('2d');
+
+		var image = new Image();
+		image.onload = function () {
+			//update the message
+			message.innerText = "Success. The camera is now connected!"
+			// Clear the canvas
+			context.clearRect(0, 0, canvas.width, canvas.height);
+			//show spinner
+			document.getElementById('spinner').style.display = 'none';
+		};
+		image.src = "{{ url_for('live_streaming') }}";
+		document.getElementById('continue').addEventListener('click', function() {
+			document.getElementById('spinner').style.display = 'block';
+		});
+	}
+	$(document).ready(function(){
+		document.getElementById("camera_rtsp_address").options.namedItem("{{ details.selected_rtsp }}").selected=true;
+		//document.getElementById("camera_rtsp_address").text = "{{ details.selected_rtsp }}";
+		const canvas = document.getElementById("canvas_picture");
+		canvas.style.width = "1000px";
+		canvas.style.height = "500px";
+		var context = canvas.getContext('2d');
+		var image = new Image();
+		image.onload = function () {
+			//update the message
+			message.innerText = "Success. The camera is now connected!"
+			// Clear the canvas
+			context.clearRect(0, 0, canvas.width, canvas.height);
+			//show spinner
+			document.getElementById('spinner').style.display = 'none';
+		};
+		image.src = "{{ url_for('live_streaming') }}";
+		document.getElementById('continue').addEventListener('click', function() {
+			document.getElementById('spinner').style.display = 'block';
+		});
+	});
+</script>
+{% endblock content %}

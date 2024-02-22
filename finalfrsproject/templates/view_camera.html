@@ -7,6 +7,9 @@
 			<div class="wbcam-col">
 				<div class="webcam_div" style="text-align: center; border: 3px solid #f29d0a;width:100%">
 					<canvas id="canvas_picture" style="width:1000px; height:500px; object-fit: cover; background-image: url({{ url_for('view_camera') }})"></canvas>
+					<div id="spinner" style="position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%);">
+						<div class="css-spinner"></div>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -19,13 +22,24 @@
 </section>
 <script>
 	$(document).ready(function(){
+		const message = document.getElementById("message");
 		const canvas = document.getElementById("canvas_picture");
 		canvas.style.width = "1000px";
 		canvas.style.height = "500px";
 		var context = canvas.getContext('2d');
-		context.clearRect(0, 0, canvas.width, canvas.height);
-		context.font = "20px Arial";
-		context.fillText("Loading Image.......", 60, 80);
+		var image = new Image();
+		image.onload = function () {
+			//update the message
+			message.innerText = "Success. The camera is now connected!"
+			// Clear the canvas
+			context.clearRect(0, 0, canvas.width, canvas.height);
+			//show spinner
+			document.getElementById('spinner').style.display = 'none';
+		};
+		image.src = "{{ url_for('view_camera') }}";
+		document.getElementById('continue').addEventListener('click', function() {
+			document.getElementById('spinner').style.display = 'block';
+		});
 	});
 </script>
 {% endblock content %}

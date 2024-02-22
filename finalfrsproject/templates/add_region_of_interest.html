@@ -1,70 +1,75 @@
 {% extends "layout.html" %}
 {% block content %}
-<section class="recognize_section" id="recognize_section">
-	<form id="form" action="{{ url_for('add_region_of_interest') }}" method="post" enctype="multipart/form-data">
-		<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-		<div class="row" id="img-vg-content_1" style="margin-bottom:20px">
-			<div class="wbcam-col" style="height:760">
-				<div class="webcam_div" style="text-align: center; border: 3px solid #f29d0a;">
-					<canvas id="canvas_picture"></canvas>
+<div id="edit_tools" style="text-align:center; width:100%; margin-bottom:20px;">
+    <div style="display:inline-block; margin:0 auto;">
+        <button type="button" id="rectangle_button" name="rectangle_button" value="Rectangle" class="c-btn" style="width:200px; background:#0000ff; border-color:#0000ff; color:#ffffff; margin:5px;">Rectangle</button>
+        <button type="button" id="circle_button" name="circle_button" value="Circle" class="c-btn" style="width:200px; background:#0000ff; border-color:#0000ff; color:#ffffff; margin:5px;">Circle</button>
+        <button type="button" id="delete_button" name="delete_button" value="Delete" class="c-btn" style="width:200px; background:#0000ff; border-color:#0000ff; color:#ffffff; margin:5px;">Delete</button>
+        <button type="button" id="done_button" name="done_button" value="Done" class="c-btn" style="width:200px; background:#0000ff; border-color:#0000ff; color:#ffffff; margin:5px;">Done</button>
+    </div>
+</div>
+<section class="user user_register_section" id="region_of_interest_section" style="padding-top:2em; text-align:center margin:0 auto">
+	<div class="col-md-1"></div>
+	<div class="col-md-10">
+		<form id="form" action="{{ url_for('add_region_of_interest') }}" method="post" enctype="multipart/form-data">
+			<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+			<div class="row" id="img-vg-content_1" style="margin-bottom:20px">
+				<div class="wbcam-col" style="height:760">
+					<div class="webcam_div" style="text-align: center; border: 3px solid #f29d0a;">
+						<canvas id="canvas_picture"></canvas>
+					</div>
 				</div>
 			</div>
-		</div>
-		<div class="row" id="img-vg-content_2" style="margin-bottom:20px">
-			<div class="col-xs-12 buttons faceapi-button">
-				<button type="submit" id="continue" name="continue" value ="continue" class="c-btn">Continue without a Region of Interest</button>
+			<div class="row" id="img-vg-content_2" style="margin-bottom:20px">
+				<div class="col-xs-8 buttons faceapi-button">
+					<button type="submit" id="continue" name="continue" value ="continue" class="c-btn">Continue without a Region of Interest</button>
+				</div>
 			</div>
-		</div>
-		<div class="row" id="img-vg-content_3" style="margin-bottom:20px">
-			<div class="col-xs-12 buttons faceapi-button">
-				<button type="button" id="draw_line" name="draw_line" value ="draw_line" class="c-btn" style="background:#0000ff;border-color:#0000ff;color:#ffffff">Click Here to Draw a Region of Interest</button>
+			<div class="row" id="img-vg-content_3" style="margin-bottom:20px">
+				<div class="col-xs-8 buttons faceapi-button">
+					<button type="button" id="draw_line" name="draw_line" value ="draw_line" class="c-btn" style="background:#0000ff;border-color:#0000ff;color:#ffffff">Click Here to Draw a Region of Interest</button>
+				</div>
 			</div>
-		</div>
-		<div class="row" id="img-vg-content_4" style="margin-bottom:20px">
-			<div class="col-xs-6 buttons faceapi-button">
-				<button type="button" id="clear_last" name="clear_last" value ="clear_last" class="c-btn" style="background:#f29d0a;border-color:#f29d0a;">Clear Last Line</button>
+			<div class="row" id="img-vg-content_4" style="margin-bottom:20px">
+				<div class="col-xs-4 buttons faceapi-button">
+					<button type="button" id="clear_last" name="clear_last" value ="clear_last" class="c-btn" style="background:#f29d0a;border-color:#f29d0a;">Clear Last Line</button>
+				</div>
+				<div class="col-xs-4 buttons faceapi-button">
+					<button type="button" id="clear_all" name="clear_all" value ="clear_all" class="c-btn" style="background:#fa0000;border-color:#fa0000;">Clear All Lines</button>
+				</div>
 			</div>
-			<div class="col-xs-6 buttons faceapi-button">
-				<button type="button" id="clear_all" name="clear_all" value ="clear_all" class="c-btn" style="background:#fa0000;border-color:#fa0000;">Clear All Lines</button>
+			<div class="row" id="img-vg-content_5" style="margin-top:50px">
+				<div class="form-group col-md-8">
+				  <select name="roi_type" id="roi_type" class="form-control">
+					<option value="">Do you to include or exclude region of interest</option>
+					<option value="Include">Include</option>
+					<option value="Exclude">Exclude</option>
+				  </select>
+				</div>
 			</div>
-		</div>
-		<div class="row" id="img-vg-content_5" style="margin-top:50px">
-			<div class="form-group col-md-12">
-              <select name="roi_type" id="roi_type" class="form-control required">
-                <option value="">Do you to include or exclude region of interest</option>
-                <option value="Include">Include</option>
-                <option value="Exclude">Exclude</option>
-              </select>
-            </div>
-		</div>
-		<div class="row" id="img-vg-content_6" style="text-align: center; margin: 0 auto">
-			<div class="col-xs-12 buttons faceapi-button">
-				<button type="button" id="save" name="save" value ="save" class="c-btn">Save</button>
+			<div class="row" id="img-vg-content_6" style="text-align: center; margin: 0 auto">
+				<div class="col-xs-6 buttons faceapi-button">
+					<button type="button" id="save" name="save" value ="save" class="c-btn">Save</button>
+				</div>
 			</div>
-		</div>
-	</form>
+		</form>
+		<div class="col-md-1"></div>
+	</div>
 </section>
 <script>
 	$(document).ready(function(){
 		$("#img-vg-content_4").hide();
 		$("#img-vg-content_5").hide();
 		$("#img-vg-content_6").hide();
-
+		$("#edit_tools").hide();
 		var image_html_path = "{{ details.image }}"
 		console.log("image path: ", image_html_path)
 		var canvas = document.getElementById("canvas_picture");
 		canvas.style.width = "1000px";
 		canvas.style.height = "500px";
-		//var context = canvas.getContext('2d');
-		//context.clearRect(0, 0, canvas.width, canvas.height);
-		//var image = new Image();
-		//image.src = "{{ url_for('view_camera') }}";
-		//image.src = image_html_path
-		//image.onLoad = function() {
-		//	context.drawImage(image, 0, 0, canvas.width, canvas.height);
-		//}
+		//var pencilCursorUrl = '/static/images/brush.png';
 
-		var line;
+		//var line;
 		var fabric_canvas = new fabric.Canvas(canvas, {
 			width:"1000",
 			height: "500"
@@ -74,21 +79,97 @@
 			backgroundImageStretch: false,
 		});
 
-		var line_coordinates_array = [];
-		var line_coordinates;
+		//var line_coordinates_array = [];
+		//var line_coordinates;
 		var draw_line_button = document.getElementById('draw_line');
-		mouse_down = false;
+		//mouse_down = false;
 		draw_line_button.addEventListener('click',activate_draw_line);
 		function activate_draw_line() {
-			fabric_canvas.cursor = "pointer";
-			$("#img-vg-content_2").hide();
-			$("#img-vg-content_3").hide();
+			show_alert_model();
+			//Apply Custom Cursor
+			//fabric_canvas.defaultCursor = `url(${pencilCursorUrl}) 16 32, auto`;
+			//fabric_canvas.hoverCursor = `url(${pencilCursorUrl}) 16 32, auto`;
+			//$("#img-vg-content_2").hide();
+			//$("#img-vg-content_3").hide();
 
-			fabric_canvas.on('mouse:down',start_line);
-			fabric_canvas.on('mouse:move',draw_line);
-			fabric_canvas.on('mouse:up',end_line);
+			//fabric_canvas.on('mouse:down',start_line);
+			//fabric_canvas.on('mouse:move',draw_line);
+			//fabric_canvas.on('mouse:up',end_line);
 			fabric_canvas.selection = false;
 		}
+
+		var rectangle_button = document.getElementById('rectangle_button');
+		rectangle_button.addEventListener('click',createRect);
+		var circle_button = document.getElementById('circle_button');
+		circle_button.addEventListener('click',createCircle);
+		var delete_button = document.getElementById('delete_button');
+		delete_button.addEventListener('click',deleteSelected);
+		var done_button = document.getElementById('done_button');
+		done_button.addEventListener('click',toJson);
+
+		function createRect() {
+            var rect = new fabric.Rect({
+                left: 100,
+                top: 100,
+                fill: 'transparent',
+                width: 100,
+                height: 100,
+				stroke: "blue",
+				strokeWidth: 2
+            });
+            fabric_canvas.add(rect);
+        }
+
+		function createCircle() {
+            var circle = new fabric.Circle({
+                radius: 50,
+                fill: 'transparent',
+                left: 200,
+                top: 200,
+				stroke: "blue",
+				strokeWidth: 2
+            });
+            fabric_canvas.add(circle);
+        }
+
+        function deleteSelected() {
+            var activeObject = fabric_canvas.getActiveObject();
+            if (activeObject) {
+                fabric_canvas.remove(activeObject);
+            }
+        }
+
+		function toJson() {
+            var json = fabric_canvas.toJSON();
+            console.log(json);
+            // Implement saving or displaying the JSON string as needed
+        }
+
+        function fromJson() {
+            var json = '{}'; // Replace with your JSON string
+            canvas.loadFromJSON(json, canvas.renderAll.bind(canvas));
+        }
+
+		function show_alert_model() {
+			Swal.fire({
+				title: 'Info',
+				html: '<span style="font-size: 20px;">Drawing activated!</span>',
+				confirmButtonText: 'OK',
+				confirmButtonColor: '#3085d6',
+				customClass: {
+					popup: 'my-popup-class',
+					confirmButton: 'my-confirm-button-class',
+					title: 'my-title-class',
+				}
+			}).then((result) => {
+				if (result.isConfirmed) {
+					console.log('OK button was clicked');
+					$("#edit_tools").show();
+				}
+			});
+		}
+
+		/*
 		function start_line(o) {
 			$("#img-vg-content_2").hide();
 			$("#img-vg-content_3").hide();
@@ -123,20 +204,20 @@
 			line_coordinates["end_x"] = pointer.x;
 			line_coordinates["end_y"] = pointer.y;
 			line_coordinates_array.push(line_coordinates);
+
+
+
 			console.log(line_coordinates_array.length);
 			if (line_coordinates_array.length > 0) {
 				$("#img-vg-content_4").show();
 				$("#img-vg-content_6").show();
 			}
-		}
-
-
+		}*/
       	$(document).keypress(function(e) {
         	if(e.which == 13) {
           		$("#save").trigger("click");
         	}
       	});
-
       	$("#save").click(function() {
 			$("#img-vg-content_2").hide();
 			$("#img-vg-content_3").hide();
@@ -147,7 +228,6 @@
 			if (roi_type.value == "") {
 				document.getElementById('roi_type').focus();
 			} else {
-				alert("here");
 				var form_element = document.getElementById('form');
 				var region_of_interest = document.createElement('input');
 				region_of_interest.type = 'hidden';
@@ -155,17 +235,20 @@
 				region_of_interest.value = JSON.stringify(line_coordinates_array);
 				form_element.appendChild(region_of_interest); //add the array of lines
 				form_element.submit();
-
 			}
-
-
     	});
-
-      	$(document).keypress(function(e) {
-        	if(e.which == 13) {
-          		$("#clear_last").trigger("click");
-        	}
+    	$("#form").validate({
+			errorPlacement: function (error, element){
+			  element.before(error);
+			},
+			rules: {
+			  roi_type: {
+				  required : true
+			  }
+			}
       	});
+
+		/*
       	$("#clear_last").click(function() {
 				//get the array and remove the last element
 				line_coordinates_array.pop();
@@ -194,11 +277,6 @@
 				}
     	});
 
-		$(document).keypress(function(e) {
-        	if(e.which == 13) {
-          		$("#clear_all").trigger("click");
-        	}
-      	});
       	$("#clear_all").click(function() {
 				//reset the array
 				line_coordinates_array = [];
@@ -213,7 +291,7 @@
 					backgroundImageOpacity: 1,
 					backgroundImageStretch: false,
 				});
-    	});
+    	}); */
 
 	});
 </script>

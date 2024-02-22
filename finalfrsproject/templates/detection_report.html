@@ -1,71 +1,80 @@
 {% extends "layout.html" %}
 {% block content %}
 <section class="user_vehicle_section">
-    <form id="form" name="form" method="POST" action="{{ url_for('person_report') }}" method="post" class="login">
+    <form action="{{ url_for('detection_report') }}" class="login" id="form" method="POST" name="form">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <input type="hidden" id="start_date" name="start_date">
-        <input type="hidden" id="end_date" name="end_date">
-        <input type="hidden" id="report" name="report" value="person_report">
-        <div id="img-vg-content" style="text-align: center;">
-            <div class="col-xs-12" >
+        <input id="start_date" name="start_date" type="hidden">
+        <input id="end_date" name="end_date" type="hidden">
+        <input id="report" name="report" type="hidden" value="person_report">
+        <div id="img-vg-content-1" style="text-align: center;">
+            <div class="col-xs-12">
                 <div class="searchbar-box">
-                    <label>Report Date Range: </label>
-                    <input type="text" class="form-control" id="date_input" name="date_input" style="width:50%; background: #000000; color: #fff; text-align: center; border: 1px solid#00ffe4; font-size: 18px;">
+                   <input class="form-control" id="date_input" name="date_input" type="text">
                 </div>
             </div>
-            <button type="submit" id = "sbmt_button" name="sbmt_button" class="c-btn">Submit</button>
+            <div class="col-xs-1"></div>
+            <div class="col-xs-5">
+                <select name="camera_ip_address" id="camera_ip_address" class="form-control required">
+                    <option value="All" style="text-align: center;">Camera IP Address</option>
+                      {% for camera in details.camera_list %}
+                        <option value="{{ camera.camera_ip_address }}"> {{ camera.camera_ip_address }} </option>
+                      {% endfor %}
+                </select>
+            </div>
+            <div class="col-xs-5">
+                <select name="detection_category" id="detection_category" class="form-control required">
+                    <option value="All" style="text-align: center;">Detection Category</option>
+                      {% for category in details.detection_category_list %}
+                        <option value="{{ category.detection_category }}"> {{ category.detection_category }} </option>
+                      {% endfor %}
+                </select>
+            </div>
+            <div class="col-xs-1"></div>
+            <button class="c-btn" id="sbmt_button" name="sbmt_button" type="submit" style="margin-top:50px">Submit</button>
         </div>
     </form>
-    <div id="img-vg-content">
+    <div id="img-vg-content-2">
         <div class="table-responsive">
             <table class="table table-striped dataTables-example dataTable" style="width: 90%; margin:0 auto">
                 <thead>
                     <tr>
-                        <th>Person Name</th>
-                        <th>Fathers Name</th>
-                        <th>Resident Of</th>
-                        <th>Vehicle Plate Number</th>
-                        <th>Traveler Type</th>
-                        <th>Aadhar Number</th>
-                        <th>Driver's License Number</th>
-                        <th>Entry Time</th>
+                        <th>Detection Time</th>
+                        <th>Detection Model</th>
+                        <th>Detection Category</th>
+                        <th>Camera ID</th>
+                        <th>Frame ID</th>
+                        <th>Detection Image</th>
+                        <th>Alert Status</th>
+                        <th>Alert Time</th>
                     </tr>
                 </thead>
                 <tbody>
-                {% if details.person_report_list %}
-                    {% for person in details.person_report_list %}
-                    <tr>
-                        {% if person.person_name %}
-                            <td><a href="javascript:show_modal('{{ person.person_name }}','{{ person.person_image }}')">{{ person.person_name }}</a></td>
-                        {% else %}
-                            <td>No records found</td>
-                        {% endif %}
-                        <td>{{ person.fathers_name }}</td>
-                        <td>{{ person.resident_of }}</td>
-                        <td>{{ person.vehicle_plate_number }}</td>
-                        <td>{{ person.traveler_type }}</td>
-                        {% if person.aadhar_number %}
-                            <td><a href="javascript:show_modal('{{ person.aadhar_number }}','{{ person.aadhar_image }}')">{{ person.aadhar_number }}</a></td>
-                        {% else %}
-                            <td>No records found</td>
-                        {% endif %}
-                        {% if person.drivers_license %}
-                            <td><a href="javascript:show_modal('{{ person.drivers_license }}','{{ person.drivers_license_image }}')">{{ person.drivers_license }}</a></td>
-                        {% else %}
-                            <td>No records found</td>
-                        {% endif %}
-                        <td>{{ person.entry_time }}</td>
-                        
-                    </tr>
-                    {% endfor %}
-                    
+                {% if details.detection_report_list %}
+                {% for detection in details.detection_report_list %}
+                <tr>
+                    <td>{{ detection.detection_time }}</td>
+                    <td>{{ detection.detection_model }}</td>
+                    <td>{{ detection.detection_category }}</td>
+                    <td>{{ detection.camera_ip_address }}</td>
+                    <td>{{ detection.frame_id }}</td>
+                    {% if detection.detection_image_location %}
+                    <td>
+                        <a href="javascript:show_modal('{{ detection.detection_time }}','{{ detection.detection_image_location }}')">Click here</a></td>
+                    {% else %}
+                    <td>No records found</td>
+                    {% endif %}
+                    <td>{{ detection.alert_status }}</td>
+                    <td>{{ detection.alert_time }}</td>
+                </tr>
+                {% endfor %}
+
                 </tbody>
             </table>
         </div>
-        
+
         {% endif %}
         <!-- The Modal -->
-        <div id="myModal" class="modal">
+        <div class="modal" id="myModal">
             <!-- The Close Button -->
             <span class="close">&times;</span>
 
@@ -76,8 +85,8 @@
             <div id="caption"></div>
         </div>
     </div>
-    <div style="text-align: center; margin-top: 50px" >
-        <button type="button" id = "download" name="download" class="c-btn">Download CSV</button>
+    <div style="text-align: center; margin-top: 50px">
+        <button class="c-btn" id="download" name="download" type="button">Download CSV</button>
     </div>
 </section>
 
@@ -109,6 +118,9 @@
     }
 
 $(document).ready(function(){
+    document.getElementById("camera_ip_address").value = "{{ details.camera_ip_address }}";
+    document.getElementById("detection_category").value = "{{ details.detection_category }}";
+
     let start_date = null
     let end_date = null
     $('#date_input').daterangepicker();
@@ -159,12 +171,7 @@ $(document).ready(function(){
        $('#form').attr('action', '{{ url_for('download_report') }}');
         form.submit();
     });
-
-
-
 });
-
-
 
 
 </script>

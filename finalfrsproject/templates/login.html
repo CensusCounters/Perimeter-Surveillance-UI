@@ -1,18 +1,24 @@
 {% extends "layout.html" %}
 {% block content %}
-  <section class="user login_section" style="padding-top:2em">
-    <form id="form" action="{{ url_for('login') }}" class="login" method="post">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-      <div class="form-group col-md-8" style="width:100%;text-align:center !important;">
-        <input id="username" name="username" type="text" class="form-control" placeholder="Enter your username" value="Tushar Khichariya">
+  <section class="user user_register_section" style="padding-top:2em">
+    <div class="row" id="img-vg-content">
+      <div class="col-md-6">
+        <div class="user-form">
+            <form id="form" action="{{ url_for('login') }}" class="login" method="post">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <div class="form-group col-md-8" style="width:100%;text-align:center !important;">
+                <input id="username" name="username" type="text" class="form-control" placeholder="Enter your username" value="Tushar Khichariya">
+              </div>
+              <div class="form-group col-md-8" style="width:100%;text-align: center;">
+                <input id="password" name="password" type="password" class="form-control required" placeholder="Enter your password" value="password">
+              </div>
+              <div class="col-xs-12 buttons text-center">
+                <button type="button" id = "login" class="c-btn" style="width: 100%;">Login</button>
+              </div>
+          </form>
+        </div>
       </div>
-      <div class="form-group col-md-8" style="width:100%;text-align: center;">
-        <input id="password" name="password" type="password" class="form-control required" placeholder="Enter your password" value="password">
-      </div>
-      <div class="col-xs-12 buttons text-center">
-        <button type="button" id = "login" class="c-btn" style="width: 100%;">Login</button>
-      </div>
-    </form>
+    </div>
   </section>
   
   

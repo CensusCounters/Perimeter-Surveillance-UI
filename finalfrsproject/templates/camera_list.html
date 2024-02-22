@@ -7,6 +7,7 @@
             <table class="table table-striped dataTables-example dataTable" id="camera-list">
                 <thead>
                     <tr>
+                        <th>Camera Location</th>
                         <th>Camera Make</th>
                         <th>Camera IP Address</th>
                         <th>Camera Username</th>
@@ -21,15 +22,16 @@
                 {% if details.camera_list %}
                     {% for camera in details.camera_list %}
                     <tr>
+                        <td width="5%">{{ camera.location_name }}</td>
                         <td width="5%">{{ camera.camera_make }}</td>
                         <td width="8%">{{ camera.camera_ip_address }}</td>
                         <td width="5%">{{ camera.camera_username }}</td>
                         <td width="5%">{{ camera.camera_password }}</td>
-                        <td width="20%">{{ camera.camera_rtsp_address }}</td>
+                        <td width="18%">{{ camera.camera_rtsp_address }}</td>
                         <td width="20%">{{ camera.camera_region_of_interest }}</td>
-                        <td width="20%">{{ camera.camera_associated_services }}</td>
+                        <td width="17%">{{ camera.camera_associated_services }}</td>
                         <td width="17%">
-                            <button type="button" class="btn btn-primary" style="height: 80%; width:80%; font-size: 14px;" onclick="editCamera('{{ camera.camera_id}}')">Edit
+                            <button type="button" class="btn btn-primary" style="height: 80%; width:80%; font-size: 14px;" onclick="editCamera('{{ camera.id}}')">Edit
                             </button>
                         </td>
                     </tr>
