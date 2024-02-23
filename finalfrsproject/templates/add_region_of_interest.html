@@ -5,7 +5,6 @@
         <button type="button" id="rectangle_button" name="rectangle_button" value="Rectangle" class="c-btn" style="width:200px; background:#0000ff; border-color:#0000ff; color:#ffffff; margin:5px;">Rectangle</button>
         <button type="button" id="circle_button" name="circle_button" value="Circle" class="c-btn" style="width:200px; background:#0000ff; border-color:#0000ff; color:#ffffff; margin:5px;">Circle</button>
         <button type="button" id="delete_button" name="delete_button" value="Delete" class="c-btn" style="width:200px; background:#0000ff; border-color:#0000ff; color:#ffffff; margin:5px;">Delete</button>
-        <button type="button" id="done_button" name="done_button" value="Done" class="c-btn" style="width:200px; background:#0000ff; border-color:#0000ff; color:#ffffff; margin:5px;">Done</button>
     </div>
 </div>
 <section class="user user_register_section" id="region_of_interest_section" style="padding-top:2em; text-align:center margin:0 auto">
@@ -104,8 +103,17 @@
 		circle_button.addEventListener('click',createCircle);
 		var delete_button = document.getElementById('delete_button');
 		delete_button.addEventListener('click',deleteSelected);
-		var done_button = document.getElementById('done_button');
-		done_button.addEventListener('click',toJson);
+
+		function toggleSaveButton() {
+			var objects = fabric_canvas.getObjects();
+			if(objects.length > 0) {
+				$("#img-vg-content_6").show();
+				$("#img-vg-content_2").hide();
+			}else{
+				$("#img-vg-content_6").hide();
+				$("#img-vg-content_2").show();
+			}
+		}
 
 		function createRect() {
             var rect = new fabric.Rect({
@@ -114,10 +122,13 @@
                 fill: 'transparent',
                 width: 100,
                 height: 100,
-				stroke: "blue",
-				strokeWidth: 2
+				stroke: "red",
+				strokeWidth: 15
             });
             fabric_canvas.add(rect);
+			fabric_canvas.setActiveObject(rect);
+			fabric_canvas.renderAll();
+			toggleSaveButton();
         }
 
 		function createCircle() {
@@ -126,10 +137,13 @@
                 fill: 'transparent',
                 left: 200,
                 top: 200,
-				stroke: "blue",
-				strokeWidth: 2
+				stroke: "red",
+				strokeWidth: 15
             });
             fabric_canvas.add(circle);
+			fabric_canvas.setActiveObject(circle);
+			fabric_canvas.renderAll();
+			toggleSaveButton();
         }
 
         function deleteSelected() {
@@ -137,6 +151,7 @@
             if (activeObject) {
                 fabric_canvas.remove(activeObject);
             }
+			toggleSaveButton();
         }
 
 		function toJson() {
@@ -147,7 +162,7 @@
 
         function fromJson() {
             var json = '{}'; // Replace with your JSON string
-            canvas.loadFromJSON(json, canvas.renderAll.bind(canvas));
+            fabric_canvas.loadFromJSON(json, canvas.renderAll.bind(canvas));
         }
 
 		function show_alert_model() {
@@ -165,6 +180,7 @@
 				if (result.isConfirmed) {
 					console.log('OK button was clicked');
 					$("#edit_tools").show();
+					$("#img-vg-content_3").hide();
 				}
 			});
 		}
@@ -224,6 +240,10 @@
 			$("#img-vg-content_4").hide();
 			$("#img-vg-content_5").show();
 
+			$("#edit_tools").hide();
+			var json_markings = fabric_canvas.toJSON();
+			console.log("json_markings--- ", json_markings)
+
 			var roi_type = document.getElementById('roi_type')
 			if (roi_type.value == "") {
 				document.getElementById('roi_type').focus();
@@ -232,7 +252,8 @@
 				var region_of_interest = document.createElement('input');
 				region_of_interest.type = 'hidden';
 				region_of_interest.name = 'region_of_interest';
-				region_of_interest.value = JSON.stringify(line_coordinates_array);
+				// region_of_interest.value = JSON.stringify(line_coordinates_array);
+				region_of_interest.value = JSON.stringify(json_markings);
 				form_element.appendChild(region_of_interest); //add the array of lines
 				form_element.submit();
 			}
