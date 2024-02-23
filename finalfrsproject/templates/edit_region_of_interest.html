@@ -82,13 +82,20 @@
 			backgroundImageStretch: false,
 		});
 		{% if details.camera_region_of_interest %}
-	        camera_region_of_interest = "{{ details.camera_region_of_interest }}";
-	        // camera_region_of_interest = camera_region_of_interest.replace(/&#39;/g, '"');
-	        //console.log(camera_region_of_interest);
+			camera_region_of_interest = "{{ details.camera_region_of_interest }}";
+			camera_region_of_interest = camera_region_of_interest.replace(/&#39;|False|True|None/g, function(match) {
+				switch(match) {
+					case "&#39;": return '"';
+					case "False": return false;
+					case "True": return true;
+					case "None": return null;
+					default: return match;
+				}
+			});
+	        // console.log(camera_region_of_interest);
             json_obj = JSON.parse(camera_region_of_interest);
 	        console.log(json_obj);
 			fabric_canvas.loadFromJSON(json_obj, fabric_canvas.renderAll.bind(fabric_canvas));
-			toggleSaveButton();
 	        // for (const [key, value] of Object.entries(json_obj)) {
 	        // 	start_x = value["start_x"];
 			// 	start_y = value["start_y"];
@@ -122,6 +129,7 @@
 			// fabric_canvas.on('mouse:move',draw_line);
 			// fabric_canvas.on('mouse:up',end_line);
 			fabric_canvas.selection = false;
+			toggleSaveButton();
 		}
 
 		var rectangle_button = document.getElementById('rectangle_button');

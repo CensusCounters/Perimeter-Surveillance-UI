@@ -9,7 +9,13 @@ from flask_jwt_extended import create_access_token, get_jwt_identity, get_jwt, j
 import json
 import pandas as pd
 
+# Define the custom filter
+def json_truncate(value, length=20):
+    json_str = json.dumps(value)
+    return json_str[:length] + '...' if len(json_str) > length else json_str
 
+# Register the custom filter with Jinja2
+app.jinja_env.filters['json_truncate'] = json_truncate
 # Login
 @app.route("/", methods=['GET'])
 @app.route("/login", methods=['GET', 'POST'])
