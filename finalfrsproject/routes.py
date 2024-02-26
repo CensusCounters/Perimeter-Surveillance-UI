@@ -9,6 +9,11 @@ from flask_jwt_extended import create_access_token, get_jwt_identity, get_jwt, j
 import json
 import pandas as pd
 
+from .kafka_consumer import start_kafka_consumer
+import threading
+
+threading.Thread(target=start_kafka_consumer).start()
+
 # Define the custom filter
 def json_truncate(value, length=20):
     json_str = json.dumps(value)
@@ -16,6 +21,7 @@ def json_truncate(value, length=20):
 
 # Register the custom filter with Jinja2
 app.jinja_env.filters['json_truncate'] = json_truncate
+
 # Login
 @app.route("/", methods=['GET'])
 @app.route("/login", methods=['GET', 'POST'])
@@ -172,6 +178,25 @@ def logout():
 def after_request(response):
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     return response
+
+# handle-alert
+@app.route('/handle-alert', methods=['POST'])
+@jwt_required()
+def handle_alert():
+    if request.method == 'POST':
+        # Extract alert_id from the posted JSON data
+        data = request.get_json()
+        alert_id = data.get('alert_id')
+
+        # Process the alert_id as needed
+        print(f'Received alert_id: {alert_id}')
+        jwt_details = get_jwt_identity()
+        logged_in_user_id = jwt_details.get('logged_in_user_id')
+
+        sqlCommands.update_alert_detection(alert_id, logged_in_user_id)
+
+        # Respond back to the AJAX call
+        return jsonify({"message": "Alert ID received successfully"})
 
 
 # Home

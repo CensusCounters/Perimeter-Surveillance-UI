@@ -2,6 +2,8 @@ import psycopg2
 import psycopg2.extras
 from finalfrsproject import app
 import os, shutil
+import json
+from datetime import datetime
 
 postgres_conn = None
 
@@ -562,4 +564,110 @@ def get_detections_by_date(start_date, end_date, camera_ip_address, detection_ca
             cursor.close()
             postgres_conn.close()
 
+    return result
+
+def insert_alert_detection(detection_data):
+    global postgres_conn
+    cursor = None
+    result = None
+    psycopg2.extras.register_uuid()
+    print("sql insert stmt: ")
+    try:
+        if not postgres_conn:
+            connect_to_db()
+
+        if postgres_conn.closed != 0:
+            connect_to_db()
+
+        cursor = postgres_conn.cursor()
+        print("sql insert stmt: ")
+
+        # print("detection_data:: ", detection_data)
+        # Extract data
+
+        # Insert Alert
+        cursor.execute("""
+            INSERT INTO alerts DEFAULT VALUES RETURNING id;
+        """)
+        alert_id = cursor.fetchone()[0]
+        print("alert_id :::: ", alert_id)
+
+        bounding_boxes_json = json.dumps(detection_data['bounding_boxes_arr'])
+
+        cursor.execute("""
+            INSERT INTO Detections (
+            date_created, camera_id, frame_id, detection_model, detection_category,
+            bounding_boxes, detection_image_location, was_alert_sent, alert_id
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);
+            """, (
+            detection_data['time'], detection_data['camera_id'], detection_data['frame_id'],
+            detection_data['detection_model'], detection_data['detection_type'],
+            bounding_boxes_json, detection_data['image_location'], True, alert_id
+            ))
+        postgres_conn.commit()
+        print("Alert and detection inserted successfully.")
+        return alert_id
+
+    except (Exception, psycopg2.Error) as error:
+        print("Error while executing PostgreSQL command", error)
+        result = {"Status": "Fail", "Insert_Count": 0, "Details": error}
+
+    finally:
+        # closing database connection.
+        if postgres_conn:
+            cursor.close()
+            postgres_conn.close()
+            # print("PostgreSQL connection is closed")
+    return result
+
+
+def update_alert_detection(alertId, acknowledged_by):
+    global postgres_conn
+    cursor = None
+    result = None
+    psycopg2.extras.register_uuid()
+    print("sql insert stmt: ")
+    try:
+        if not postgres_conn:
+            connect_to_db()
+
+        if postgres_conn.closed != 0:
+            connect_to_db()
+
+        cursor = postgres_conn.cursor()
+        print("sql insert stmt: ")
+
+        print("alert_id :::: ", alertId)
+        alert_acknowledged = True
+        alert_acknowledged_by = acknowledged_by  
+        alert_acknowledgement_time = datetime.now()
+
+        cursor.execute("""
+            UPDATE Alerts
+            SET 
+                alert_acknowledged = %s, 
+                alert_acknowledged_by = %s, 
+                alert_acknowledgement_time = %s
+            WHERE id = %s;
+            """, (
+                alert_acknowledged, 
+                alert_acknowledged_by, 
+                alert_acknowledgement_time, 
+                alertId  
+            )
+        )
+
+        postgres_conn.commit()
+        print("Alert infromation updated successfully.")
+
+    except (Exception, psycopg2.Error) as error:
+        print("Error while executing PostgreSQL command", error)
+        result = {"Status": "Fail", "Insert_Count": 0, "Details": error}
+
+    finally:
+        # closing database connection.
+        if postgres_conn:
+            cursor.close()
+            postgres_conn.close()
+            # print("PostgreSQL connection is closed")
     return result

@@ -3,9 +3,12 @@ import os
 from flask_jwt_extended import JWTManager
 from datetime import datetime, timedelta
 from flask_wtf.csrf import CSRFProtect
+from flask_socketio import SocketIO
 
 app = Flask(__name__)
-app.config["BASE_PATH"] = "/home/manish/Documents/Platform-UI/Platform-UI-v1/finalfrsproject"
+socketio = SocketIO(app)
+
+app.config["BASE_PATH"] = "/root/Projects/Perimeter-Surveillance-UI/finalfrsproject"
 #app.config["IMAGE_UPLOADS"] = "/home/manish/Documents/Platform-UI/Platform-UI-v1/finalfrsproject/static/images/uploads"
 app.config["IMAGE_PATH_FOR_HTML"] = "/static/images/uploads"
 #app.config["IMAGE_DETECTIONS"] = "/home/manish/Documents/Platform-UI/Platform-UI-v1/finalfrsproject/static/images/detections"
@@ -14,8 +17,8 @@ app.config["SAVED_REPORTS"] = "/reports/"
 app.config["ASSOCIATED_SERVICES"] = ["MOG2", "People_Detection"]
 app.config["TILED_RTSP"] = "rtsp://ec2-13-235-48-204.ap-south-1.compute.amazonaws.com:8554/stream1"
 ALLOWED_PHOTO_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp'}
-#app.config["POSTGRESQL_URL"] = "census-postgres_db"
-app.config["POSTGRESQL_URL"] = "172.17.0.1"
+# app.config["POSTGRESQL_URL"] = "census-postgres_db"
+app.config["POSTGRESQL_URL"] = "localhost"
 
 app.config["JWT_COOKIE_SECURE"] = False
 app.config["JWT_TOKEN_LOCATION"] = ["cookies"]
