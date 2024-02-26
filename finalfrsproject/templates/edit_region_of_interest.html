@@ -1,5 +1,12 @@
 {% extends "layout.html" %}
 {% block content %}
+<div id="edit_tools" style="text-align:center; width:100%; margin-bottom:20px;">
+    <div style="display:inline-block; margin:0 auto;">
+        <button type="button" id="rectangle_button" name="rectangle_button" value="Rectangle" class="c-btn" style="width:200px; background:#0000ff; border-color:#0000ff; color:#ffffff; margin:5px;">Rectangle</button>
+        <button type="button" id="circle_button" name="circle_button" value="Circle" class="c-btn" style="width:200px; background:#0000ff; border-color:#0000ff; color:#ffffff; margin:5px;">Circle</button>
+        <button type="button" id="delete_button" name="delete_button" value="Delete" class="c-btn" style="width:200px; background:#0000ff; border-color:#0000ff; color:#ffffff; margin:5px;">Delete</button>
+    </div>
+</div>
 <section class="user user_register_section" id="region_of_interest_section" style="padding-top:2em; text-align:center margin:0 auto">
 	<div class="col-md-1"></div>
 	<div class="col-md-10">
@@ -56,6 +63,8 @@
 		$("#img-vg-content_5").hide();
 		$("#img-vg-content_6").hide();
 
+		$("#edit_tools").hide();
+
 		var image_html_path = "{{ details.camera_frame_image }}"
 		console.log("image path: ", image_html_path)
 		var canvas = document.getElementById("canvas_picture");
@@ -73,45 +82,113 @@
 			backgroundImageStretch: false,
 		});
 		{% if details.camera_region_of_interest %}
-	        camera_region_of_interest = "{{ details.camera_region_of_interest }}";
-	        camera_region_of_interest = camera_region_of_interest.replace(/&#39;/g, '"');
-	        //console.log(camera_region_of_interest);
+			camera_region_of_interest = "{{ details.camera_region_of_interest }}";
+			camera_region_of_interest = camera_region_of_interest.replace(/&#39;|False|True|None/g, function(match) {
+				switch(match) {
+					case "&#39;": return '"';
+					case "False": return false;
+					case "True": return true;
+					case "None": return null;
+					default: return match;
+				}
+			});
+	        // console.log(camera_region_of_interest);
             json_obj = JSON.parse(camera_region_of_interest);
 	        console.log(json_obj);
-	        for (const [key, value] of Object.entries(json_obj)) {
-	        	start_x = value["start_x"];
-				start_y = value["start_y"];
-				end_x = value["end_x"];
-				end_y = value["end_y"];
-				redraw_line = new fabric.Line([start_x, start_y, end_x, end_y],{ stroke: 'red', strokeWidth: 10});
-				fabric_canvas.add(redraw_line);
-			}
+			fabric_canvas.loadFromJSON(json_obj, fabric_canvas.renderAll.bind(fabric_canvas));
+	        // for (const [key, value] of Object.entries(json_obj)) {
+	        // 	start_x = value["start_x"];
+			// 	start_y = value["start_y"];
+			// 	end_x = value["end_x"];
+			// 	end_y = value["end_y"];
+			// 	redraw_line = new fabric.Line([start_x, start_y, end_x, end_y],{ stroke: 'red', strokeWidth: 10});
+			// 	fabric_canvas.add(redraw_line);
+			// }
 
 	    {% endif %}
 
-		var line_coordinates_array = [];
-		var line_coordinates;
+		// var line_coordinates_array = [];
+		// var line_coordinates;
 		var draw_line_button = document.getElementById('draw_line');
-		mouse_down = false;
+		// mouse_down = false;
 		draw_line_button.addEventListener('click',activate_draw_line);
 		function activate_draw_line() {
 			show_alert_model();
-			//Apply Custom Cursor
-			fabric_canvas.defaultCursor = `url(${pencilCursorUrl}) 16 32, auto`;
-			fabric_canvas.hoverCursor = `url(${pencilCursorUrl})16 32, auto`;
+			// //Apply Custom Cursor
+			// fabric_canvas.defaultCursor = `url(${pencilCursorUrl}) 16 32, auto`;
+			// fabric_canvas.hoverCursor = `url(${pencilCursorUrl})16 32, auto`;
 
-			$("#img-vg-content_2").hide();
-			$("#img-vg-content_3").hide();
-			fabric_canvas.clear();
-			fabric_canvas.setBackgroundImage(image_html_path, fabric_canvas.renderAll.bind(fabric_canvas), {
-				backgroundImageOpacity: 1,
-				backgroundImageStretch: false,
-			});
-			fabric_canvas.on('mouse:down',start_line);
-			fabric_canvas.on('mouse:move',draw_line);
-			fabric_canvas.on('mouse:up',end_line);
+			// $("#img-vg-content_2").hide();
+			// $("#img-vg-content_3").hide();
+			// fabric_canvas.clear();
+			// fabric_canvas.setBackgroundImage(image_html_path, fabric_canvas.renderAll.bind(fabric_canvas), {
+			// 	backgroundImageOpacity: 1,
+			// 	backgroundImageStretch: false,
+			// });
+			// fabric_canvas.on('mouse:down',start_line);
+			// fabric_canvas.on('mouse:move',draw_line);
+			// fabric_canvas.on('mouse:up',end_line);
 			fabric_canvas.selection = false;
+			toggleSaveButton();
 		}
+
+		var rectangle_button = document.getElementById('rectangle_button');
+		rectangle_button.addEventListener('click',createRect);
+		var circle_button = document.getElementById('circle_button');
+		circle_button.addEventListener('click',createCircle);
+		var delete_button = document.getElementById('delete_button');
+		delete_button.addEventListener('click',deleteSelected);
+
+		function toggleSaveButton() {
+			var objects = fabric_canvas.getObjects();
+			if(objects.length > 0) {
+				$("#img-vg-content_6").show();
+				$("#img-vg-content_2").hide();
+			}else{
+				$("#img-vg-content_6").hide();
+				$("#img-vg-content_2").show();
+			}
+		}
+
+		function createRect() {
+            var rect = new fabric.Rect({
+                left: 100,
+                top: 100,
+                fill: 'transparent',
+                width: 100,
+                height: 100,
+				stroke: "red",
+				strokeWidth: 15
+            });
+            fabric_canvas.add(rect);
+			fabric_canvas.setActiveObject(rect);
+			fabric_canvas.renderAll();
+			toggleSaveButton();
+        }
+
+		function createCircle() {
+            var circle = new fabric.Circle({
+                radius: 50,
+                fill: 'transparent',
+                left: 200,
+                top: 200,
+				stroke: "red",
+				strokeWidth: 15
+            });
+            fabric_canvas.add(circle);
+			fabric_canvas.setActiveObject(circle);
+			fabric_canvas.renderAll();
+			toggleSaveButton();
+        }
+
+        function deleteSelected() {
+            var activeObject = fabric_canvas.getActiveObject();
+            if (activeObject) {
+                fabric_canvas.remove(activeObject);
+            }
+			toggleSaveButton();
+        }
+
 		function show_alert_model() {
 			Swal.fire({
 				title: 'Info',
@@ -123,92 +200,99 @@
 					confirmButton: 'my-confirm-button-class',
 					title: 'my-title-class',
 				}
+			}).then((result) => {
+				if (result.isConfirmed) {
+					console.log('OK button was clicked');
+					$("#edit_tools").show();
+					$("#img-vg-content_3").hide();
+				}
 			});
 		}
-		function start_line(o) {
-			$("#img-vg-content_2").hide();
-			$("#img-vg-content_3").hide();
-			fabric_canvas.selection = false;
-			mouse_down = true;
-			let pointer = fabric_canvas.getPointer(o.e);
-			line = new fabric.Line([pointer.x, pointer.y, pointer.x, pointer.y],
-				{ stroke: 'red', strokeWidth: 10}
-			);
-			line_coordinates = {}
-			line_coordinates["start_x"] = pointer.x;
-			line_coordinates["start_y"] = pointer.y;
-			fabric_canvas.add(line);
-			fabric_canvas.requestRenderAll();
-		}
 
-		function draw_line(o) {
-			fabric_canvas.selection = false;
-			if (mouse_down === true) {
-				let pointer = fabric_canvas.getPointer(o.e);
-				line.set({
-					x2: pointer.x, y2: pointer.y
-				});
-				fabric_canvas.requestRenderAll();
-			}
-		}
+		// function start_line(o) {
+		// 	$("#img-vg-content_2").hide();
+		// 	$("#img-vg-content_3").hide();
+		// 	fabric_canvas.selection = false;
+		// 	mouse_down = true;
+		// 	let pointer = fabric_canvas.getPointer(o.e);
+		// 	line = new fabric.Line([pointer.x, pointer.y, pointer.x, pointer.y],
+		// 		{ stroke: 'red', strokeWidth: 10}
+		// 	);
+		// 	line_coordinates = {}
+		// 	line_coordinates["start_x"] = pointer.x;
+		// 	line_coordinates["start_y"] = pointer.y;
+		// 	fabric_canvas.add(line);
+		// 	fabric_canvas.requestRenderAll();
+		// }
 
-		function end_line(o) {
-			fabric_canvas.selection = false;
-			mouse_down = false
-			let pointer = fabric_canvas.getPointer(o.e);
-			line_coordinates["end_x"] = pointer.x;
-			line_coordinates["end_y"] = pointer.y;
-			line_coordinates_array.push(line_coordinates);
-			console.log(line_coordinates_array.length);
-			if (line_coordinates_array.length > 0) {
-				$("#img-vg-content_4").show();
-				$("#img-vg-content_6").show();
-			}
-		}
+		// function draw_line(o) {
+		// 	fabric_canvas.selection = false;
+		// 	if (mouse_down === true) {
+		// 		let pointer = fabric_canvas.getPointer(o.e);
+		// 		line.set({
+		// 			x2: pointer.x, y2: pointer.y
+		// 		});
+		// 		fabric_canvas.requestRenderAll();
+		// 	}
+		// }
 
-      	$("#clear_last").click(function() {
-			//get the array and remove the last element
-			line_coordinates_array.pop();
-			//clear the canvas
-			fabric_canvas.clear();
-			fabric_canvas.setBackgroundImage(image_html_path, fabric_canvas.renderAll.bind(fabric_canvas), {
-				backgroundImageOpacity: 1,
-				backgroundImageStretch: false,
-			});
-			//loop through the array and redraw lines
-			for (const line_coordinates of line_coordinates_array ) {
-				start_x = line_coordinates["start_x"];
-				start_y = line_coordinates["start_y"];
-				end_x = line_coordinates["end_x"];
-				end_y = line_coordinates["end_y"];
-				redraw_line = new fabric.Line([start_x, start_y, end_x, end_y],{ stroke: 'red', strokeWidth: 10});
-				fabric_canvas.add(redraw_line);
-			}
-			if (line_coordinates_array.length === 0) {
-				$("#img-vg-content_2").show();
-				$("#img-vg-content_3").hide();
-				$("#img-vg-content_4").hide();
-				$("#img-vg-content_5").hide();
-				$("#img-vg-content_6").hide();
+		// function end_line(o) {
+		// 	fabric_canvas.selection = false;
+		// 	mouse_down = false
+		// 	let pointer = fabric_canvas.getPointer(o.e);
+		// 	line_coordinates["end_x"] = pointer.x;
+		// 	line_coordinates["end_y"] = pointer.y;
+		// 	line_coordinates_array.push(line_coordinates);
+		// 	console.log(line_coordinates_array.length);
+		// 	if (line_coordinates_array.length > 0) {
+		// 		$("#img-vg-content_4").show();
+		// 		$("#img-vg-content_6").show();
+		// 	}
+		// }
 
-			}
-    	});
+      	// $("#clear_last").click(function() {
+		// 	//get the array and remove the last element
+		// 	line_coordinates_array.pop();
+		// 	//clear the canvas
+		// 	fabric_canvas.clear();
+		// 	fabric_canvas.setBackgroundImage(image_html_path, fabric_canvas.renderAll.bind(fabric_canvas), {
+		// 		backgroundImageOpacity: 1,
+		// 		backgroundImageStretch: false,
+		// 	});
+		// 	//loop through the array and redraw lines
+		// 	for (const line_coordinates of line_coordinates_array ) {
+		// 		start_x = line_coordinates["start_x"];
+		// 		start_y = line_coordinates["start_y"];
+		// 		end_x = line_coordinates["end_x"];
+		// 		end_y = line_coordinates["end_y"];
+		// 		redraw_line = new fabric.Line([start_x, start_y, end_x, end_y],{ stroke: 'red', strokeWidth: 10});
+		// 		fabric_canvas.add(redraw_line);
+		// 	}
+		// 	if (line_coordinates_array.length === 0) {
+		// 		$("#img-vg-content_2").show();
+		// 		$("#img-vg-content_3").hide();
+		// 		$("#img-vg-content_4").hide();
+		// 		$("#img-vg-content_5").hide();
+		// 		$("#img-vg-content_6").hide();
 
-      	$("#clear_all").click(function() {
-			//reset the array
-			line_coordinates_array = [];
-			//clear the canvas
-			fabric_canvas.clear();
-			fabric_canvas.setBackgroundImage(image_html_path, fabric_canvas.renderAll.bind(fabric_canvas), {
-				backgroundImageOpacity: 1,
-				backgroundImageStretch: false,
-			});
-			$("#img-vg-content_2").show();
-			$("#img-vg-content_3").hide();
-			$("#img-vg-content_4").hide();
-			$("#img-vg-content_5").hide();
-			$("#img-vg-content_6").hide();
-    	});
+		// 	}
+    	// });
+
+      	// $("#clear_all").click(function() {
+		// 	//reset the array
+		// 	line_coordinates_array = [];
+		// 	//clear the canvas
+		// 	fabric_canvas.clear();
+		// 	fabric_canvas.setBackgroundImage(image_html_path, fabric_canvas.renderAll.bind(fabric_canvas), {
+		// 		backgroundImageOpacity: 1,
+		// 		backgroundImageStretch: false,
+		// 	});
+		// 	$("#img-vg-content_2").show();
+		// 	$("#img-vg-content_3").hide();
+		// 	$("#img-vg-content_4").hide();
+		// 	$("#img-vg-content_5").hide();
+		// 	$("#img-vg-content_6").hide();
+    	// });
 
     	$("#continue").click(function() {
 			var form_element = document.getElementById('form');
@@ -225,6 +309,11 @@
 			$("#img-vg-content_3").hide();
 			$("#img-vg-content_4").hide();
 			$("#img-vg-content_5").show();
+
+			$("#edit_tools").hide();
+			var json_markings = fabric_canvas.toJSON();
+			console.log("json_markings--- ", json_markings)
+
 			var roi_type = document.getElementById('roi_type')
 			if (roi_type.value == "") {
 				document.getElementById('roi_type').focus();
@@ -233,7 +322,8 @@
 				var region_of_interest = document.createElement('input');
 				region_of_interest.type = 'hidden';
 				region_of_interest.name = 'region_of_interest';
-				region_of_interest.value = JSON.stringify(line_coordinates_array);
+				// region_of_interest.value = JSON.stringify(line_coordinates_array);
+				region_of_interest.value = JSON.stringify(json_markings);
 				form_element.appendChild(region_of_interest); //add the array of lines
 				form_element.submit();
 			}
