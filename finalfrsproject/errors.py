@@ -1,7 +1,7 @@
 from finalfrsproject import app, jwt
 from flask_jwt_extended import get_jwt_identity, get_jwt, jwt_required
 from flask import render_template, jsonify
-#from flask_wtf.csrf import CSRFError
+from flask_wtf.csrf import CSRFError
 
 @app.errorhandler(404)
 #@jwt_required()

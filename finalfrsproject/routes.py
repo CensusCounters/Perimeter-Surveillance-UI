@@ -68,6 +68,7 @@ def login():
                         print("redis in login destination: ", destination)
 
                     response = make_response(redirect(url_for(destination)))
+                    #response = make_response(redirect(url_for('home')))
                     set_access_cookies(response, access_token)
                     return response
 
@@ -341,9 +342,11 @@ def add_camera():
         if request.method == 'POST':
             form = request.form
             print('form: ', form)
-            camera_location = form.get('camera_location')
-            camera_location_id = camera_location.split(",")[0]
-            camera_location_name = camera_location.split(",")[1]
+            camera_location_name = form.get('camera_location')
+            camera_sub_location_name = form.get('camera_sub_location')
+            print("camera_sub_location_name: ", camera_sub_location_name)
+            camera_location_id = form.get('camera_sub_location').split(",")[0]
+            camera_sub_location_name = form.get('camera_sub_location').split(",")[1]
             camera_make = form.get('camera_make')
             camera_ip_address = form.get('camera_ip')
             camera_username = form.get('camera_username')
@@ -353,6 +356,7 @@ def add_camera():
 
             print("rtsp: ", camera_rtsp_address)
             session_values_json_redis.update({"camera_location_name": camera_location_name})
+            session_values_json_redis.update({"camera_sub_location_name": camera_sub_location_name})
             session_values_json_redis.update({"camera_location_id": camera_location_id})
             session_values_json_redis.update({"camera_make": camera_make})
             session_values_json_redis.update({"camera_ip_address": camera_ip_address})
@@ -374,39 +378,8 @@ def add_camera():
             return render_template('view_camera.html', details=send_to_html_json)
         # GET
         else:
-            session_values_json_redis = json.loads(redisCommands.redis_conn.get(redis_parent_key))
-            result = sqlCommands.get_location_list()
-            if not result or result.get('Status') == "Fail" or len(result.get("Details")) == 0:
-                session_values_json_redis.update(
-                    {"message": "System was unable to retrieve the location list. Please try again."})
-                session_values_json_redis.update({"ticket_status": "add_camera"})
-                redisCommands.redis_conn.set(redis_parent_key, json.dumps(session_values_json_redis))
-                print("get location list failed")
-                print("redis in add_camera on list location fail: ", session_values_json_redis)
-                send_to_html_json = {
-                    'message': "System was unable to retrieve the location list. Please try again",
-                    'page_title': "Error"
-                }
-                return render_template('500.html', details=send_to_html_json), 500
-
-            else:
-                result = result.get("Details")
-                print('result ', result)
-                print('rows returned: ', len(result))
-                location_list = []
-
-                for location in result:
-                    location_list.append({
-                        "location_name": location[0],
-                        "location_id": location[1]
-                    })
-
-            if session_values_json_redis.get("message") is not None:
-                message = session_values_json_redis.get("message")
-            else:
-                message = 'Please provide the camera details in the form and click Submit.'
+            message = 'Please provide the camera details in the form and click Submit.'
             send_to_html_json = {
-                'locations': location_list,
                 'logged_in_user': jwt_details.get("logged_in_user_name"),
                 'logged_in_user_type': jwt_details.get("logged_in_user_type"),
                 'message': message,
@@ -627,7 +600,9 @@ def list_camera():
                 print('result ', type(camera_details))
                 print('result ', camera_details)
                 camera_to_edit = [{
+                    'camera_location_id': camera_details.get("location_id"),
                     'camera_location_name': camera_details.get("location_name"),
+                    'camera_sub_location_name': camera_details.get("sub_location_name"),
                     'camera_make': camera_details.get("camera_make"),
                     'camera_ip_address': camera_details.get("camera_ip_address"),
                     'camera_username': camera_details.get("camera_username"),
@@ -636,7 +611,6 @@ def list_camera():
                     'camera_region_of_interest': camera_details.get("camera_region_of_interest"),
                     'camera_associated_services': camera_details.get("camera_associated_services"),
                     'camera_id': camera_details.get("id"),
-                    'camera_location_id': camera_details.get("location_id"),
                     'camera_frame_image_actual_path': camera_details.get("camera_frame_image_actual_path")
                 }]
                 session_values_json_redis.update({'camera_to_be_edited': camera_to_edit})
@@ -703,16 +677,17 @@ def edit_camera_details():
             form = request.form
             print("form: ", form)
             camera_location = form.get('camera_location')
-            camera_location_id = camera_location.split(",")[0]
-            camera_location_name = camera_location.split(",")[1]
+            camera_sub_location = form.get('camera_sub_location')
+            camera_location_id = camera_sub_location.split(",")[0]
+            camera_location_name = camera_sub_location.split(",")[1]
             camera_make = form.get('camera_make')
             camera_ip_address = form.get('camera_ip_address')
             camera_username = form.get('camera_username')
-            camera_username = camera_username.split(" - ")[1]
+            #camera_username = camera_username.split(" - ")[1]
             camera_password = form.get('camera_password')
-            camera_password = camera_password.split(" - ")[1]
+            #camera_password = camera_password.split(" - ")[1]
             camera_rtsp_address = form.get('camera_rtsp_address')
-            camera_rtsp_address = camera_rtsp_address.split(" - ")[1]
+            #camera_rtsp_address = camera_rtsp_address.split(" - ")[1]
             camera_id = form.get('camera_id')
             camera_to_edit = session_values_json_redis.get('camera_to_be_edited')
             camera_region_of_interest = camera_to_edit[0].get('camera_region_of_interest')
@@ -733,7 +708,7 @@ def edit_camera_details():
             }]
             session_values_json_redis.update({'camera_to_be_edited': camera_to_edit})
             session_values_json_redis.update({"message": "Loading video feed from the camera..."})
-            session_values_json_redis.update({"ticket_status": "edit_region_of_interest"})
+            session_values_json_redis.update({"ticket_status": "edit_camera_details"})
             redisCommands.redis_conn.set(redis_parent_key, json.dumps(session_values_json_redis))
             print('redis in edit_camera_details after successful database update: ', session_values_json_redis)
             message = 'Loading video feed from the camera...'
@@ -749,37 +724,11 @@ def edit_camera_details():
 
         # GET
         else:
-            print('redis in edit_camera_details: ', session_values_json_redis)
-            session_values_json_redis = json.loads(redisCommands.redis_conn.get(redis_parent_key))
-            result = sqlCommands.get_location_list()
-            if not result or result.get('Status') == "Fail" or len(result.get("Details")) == 0:
-                session_values_json_redis.update(
-                    {"message": "System was unable to retrieve the location list. Please try again."})
-                session_values_json_redis.update({"ticket_status": "add_camera"})
-                redisCommands.redis_conn.set(redis_parent_key, json.dumps(session_values_json_redis))
-                print("get location list failed")
-                print("redis in add_camera on list location fail: ", session_values_json_redis)
-                send_to_html_json = {
-                    'message': "System was unable to retrieve the location list. Please try again",
-                    'page_title': "Error"
-                }
-                return render_template('500.html', details=send_to_html_json), 500
-
-            else:
-                result = result.get("Details")
-                print('result ', result)
-                print('rows returned: ', len(result))
-                location_list = []
-
-                for location in result:
-                    location_list.append({
-                        "location_name": location[0],
-                        "location_id": location[1]
-                    })
-
+            print("redis before edit_camera_html: ", session_values_json_redis)
             camera_to_edit = session_values_json_redis.get('camera_to_be_edited')
             send_to_html_json = {
-                'locations': location_list,
+                'camera_location_name': camera_to_edit[0].get("camera_location_name"),
+                'camera_sub_location_name': camera_to_edit[0].get("camera_sub_location_name"),
                 'camera_make': camera_to_edit[0].get("camera_make"),
                 'camera_ip_address': camera_to_edit[0].get("camera_ip_address"),
                 'camera_username': camera_to_edit[0].get("camera_username"),
@@ -787,18 +736,18 @@ def edit_camera_details():
                 'camera_rtsp_address': camera_to_edit[0].get("camera_rtsp_address"),
                 'camera_id': camera_to_edit[0].get("camera_id"),
                 'camera_location_id': camera_to_edit[0].get("camera_location_id"),
-                'camera_location_name': camera_to_edit[0].get("camera_location_name"),
                 'logged_in_user': jwt_details.get("logged_in_user_name"),
                 'logged_in_user_type': jwt_details.get("logged_in_user_type"),
                 'message': "Please make your changes and click Continue to proceed",
                 'page_title': "Edit Camera Settings"
             }
+            print("json before edit_camera_html: ", send_to_html_json)
             return render_template('edit_camera_details.html', details=send_to_html_json)
 
     except Exception as error:
         exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-        print(exc_type, "Exception in list_camera of", fname, "at line number", exc_tb.tb_lineno, ":", error)
+        print(exc_type, "Exception in edit_camera of", fname, "at line number", exc_tb.tb_lineno, ":", error)
         send_to_html_json = {
             'message': "An unexpected error has happened. The administrator has been notified. Use the link below to "
                        "continue.",
@@ -916,12 +865,12 @@ def report_home():
                     print('redis in report home before redirecting to detection_report')
                     return redirect(url_for('detection_report'))
 
-                elif form.get('report') == 'live_streaming':
-                    session_values_json_redis.update({"ticket_status": "live_streaming"})
+                elif form.get('report') == 'camera_status':
+                    session_values_json_redis.update({"ticket_status": "get_camera_status"})
                     redisCommands.redis_conn.set(redis_parent_key,
                                                  json.dumps(session_values_json_redis))
-                    print('redis in report_home before redirecting to live_streaming')
-                    return redirect(url_for('home'))
+                    print('redis in report_home before redirecting to get_camera_status')
+                    return redirect(url_for('get_camera_status'))
 
                 elif form.get('report') == 'trip_report':
                     session_values_json_redis.update({"ticket_status": "trip_report"})
@@ -1001,6 +950,7 @@ def detection_report():
                 print(type(detection_list))
                 camera_list = []
                 detection_category_list = []
+                '''
                 if len(detection_list) > 0:
                     for detection in detection_list:
                         if not any(
@@ -1013,10 +963,11 @@ def detection_report():
                                 for category in detection_category_list
                         ):
                             detection_category_list.append({"detection_category": detection.get("detection_category")})
+                '''
                 send_to_html_json = {
                     'detection_report_list': detection_list,
-                    'detection_category_list': detection_category_list,
-                    'camera_list': camera_list,
+                    #'detection_category_list': detection_category_list,
+                    #'camera_list': camera_list,
                     'start_date': start_date,
                     'end_date': end_date,
                     'camera_ip_address': camera_ip_address,
@@ -1058,6 +1009,7 @@ def detection_report():
                 detection_list = result.get("Details")
                 camera_list = []
                 detection_category_list = []
+                '''
                 if len(detection_list) > 0:
                     for detection in detection_list:
                         if not any(
@@ -1070,15 +1022,17 @@ def detection_report():
                                 for category in detection_category_list
                         ):
                             detection_category_list.append({"detection_category": detection.get("detection_category")})
+                '''
                 send_to_html_json = {
                     'detection_report_list': detection_list,
-                    'detection_category_list': detection_category_list,
-                    'camera_list': camera_list,
+                    #'detection_category_list': detection_category_list,
+                    #'camera_list': camera_list,
                     'start_date': start_date,
                     'end_date': end_date,
                     'camera_ip_address': 'All',
                     'detection_category': 'All',
-                    'message': 'Following records were found for the selected filters. Use the filters to refresh the report.',
+                    'message': 'Following records were found for the selected filters. '
+                               'Use the filters to refresh the report.',
                     'logged_in_user': user_name,
                     'logged_in_user_type': user_type,
                     'page_title': 'Detection Report'
@@ -1155,7 +1109,7 @@ def start_display():
                 camera_rtsp_address = form.get('camera_rtsp_address').split(" - ")[0]
                 camera_ip_address = form.get('camera_rtsp_address').split(" - ")[1].replace(" ","")
                 print("rtsp: ", camera_rtsp_address)
-                session_values_json_redis.update({"camera_rtsp_address": camera_rtsp_address})
+                session_values_json_redis.update({"rtsp_for_display": camera_rtsp_address})
                 redisCommands.redis_conn.set(jwt_details.get('logged_in_user_id'),
                                              json.dumps(session_values_json_redis))
                 print('redis in start display: ', session_values_json_redis)
@@ -1212,11 +1166,12 @@ def start_display():
             else:
                 rtsp_list = result.get("Details")
 
-                camera_rtsp_address = app.config["TILED_RTSP"]
-                print("rtsp: ", camera_rtsp_address)
-                session_values_json_redis.update({"camera_rtsp_address": camera_rtsp_address})
-                redisCommands.redis_conn.set(jwt_details.get('logged_in_user_id'),
-                                             json.dumps(session_values_json_redis))
+                if session_values_json_redis.get("rtsp_for_display") is None:
+                    camera_rtsp_address = app.config["TILED_RTSP"]
+                    print("rtsp: ", camera_rtsp_address)
+                    session_values_json_redis.update({"rtsp_for_display": camera_rtsp_address})
+                    redisCommands.redis_conn.set(jwt_details.get('logged_in_user_id'),
+                                                 json.dumps(session_values_json_redis))
                 send_to_html_json = {
                     'rtsp_list': rtsp_list,
                     'message': 'Please select a camera to see live feed from it.',
@@ -1247,8 +1202,8 @@ def live_streaming():
     session_values_json_redis = json.loads(redisCommands.redis_conn.get(jwt_details.get('logged_in_user_id')))
 
     try:
-        if session_values_json_redis.get('camera_rtsp_address'):
-            camera_rtsp_address = session_values_json_redis.get('camera_rtsp_address')
+        if session_values_json_redis.get('rtsp_for_display'):
+            camera_rtsp_address = session_values_json_redis.get('rtsp_for_display')
         print("rtsp: ", camera_rtsp_address)
         camera = cv2.VideoCapture(camera_rtsp_address, cv2.CAP_FFMPEG)
         return Response(routeMethods.generate_frames(camera),
@@ -1266,46 +1221,284 @@ def live_streaming():
         return render_template('500.html', details=send_to_html_json), 500
 
 
-@app.route("/get_camera_rtsp", methods=['GET'])
+@app.route("/get_camera_status", methods=['GET','POST'])
 @jwt_required()
-def get_rtsp_streams():
-    print("In get rtsp streams: ", request.method)
+def get_camera_status():
+    print("In get camera status: ", request.method)
     try:
         jwt_details = get_jwt_identity()
         user_name = jwt_details.get("logged_in_user_name")
         user_type = jwt_details.get("logged_in_user_type")
         session_values_json_redis = json.loads(redisCommands.redis_conn.get(jwt_details.get('logged_in_user_id')))
-
-        result = sqlCommands.get_rtsp_streams()
-        print("********************************: ", result)
-        if not result or result.get('Status') == "Fail" or len(result) == 0:
-            print("get rtsp stream query failed")
-            send_to_html_json = {
-                'message': "An unexpected error occured while retrieving rtsp streams. Please use the link below to continue.",
-                'logged_in_user': user_name,
-                'logged_in_user_type': user_type,
-                'page_title': "Error"
-            }
-            session_values_json_redis.update(
-                {"message": "An unexpected error occurred while retrieving rtsp streams. Please try again."})
-            session_values_json_redis.update({"ticket_status": "live_streaming"})
-            redisCommands.redis_conn.set(jwt_details.get('logged_in_user_id'),
-                                         json.dumps(session_values_json_redis))
-            print('redis in live streaming rtsp query fail: ', session_values_json_redis)
-            return render_template('start_display.html', details=send_to_html_json)
-
+        #POST
+        if request.method == 'POST':
+            form = request.form
+            print("form: ", form)
+            session_values_json_redis.update({"rtsp_for_display:":form.get("rtsp_address")})
+            return redirect(url_for('start_display'))
+        #GET
         else:
-            rtsp_list = result.get("Details")
-            print("rtsp_list")
-            return jsonify(rtsp_list)
+
+            result = sqlCommands.get_rtsp_streams()
+            print("********************************: ", result)
+            if not result or result.get('Status') == "Fail" or len(result) == 0:
+                print("get rtsp stream query failed")
+                send_to_html_json = {
+                    'message': "An unexpected error occurred while retrieving rtsp streams. Please use the link below to "
+                               "continue.",
+                    'logged_in_user': user_name,
+                    'logged_in_user_type': user_type,
+                    'page_title': "Error"
+                }
+                session_values_json_redis.update(
+                    {"message": "An unexpected error occurred while retrieving rtsp streams. Please try again."})
+                session_values_json_redis.update({"ticket_status": "get_camera_status"})
+                redisCommands.redis_conn.set(jwt_details.get('logged_in_user_id'),
+                                             json.dumps(session_values_json_redis))
+                print('redis in live streaming rtsp query fail: ', session_values_json_redis)
+                return render_template('500.html', details=send_to_html_json)
+
+            else:
+                camera_list = result.get("Details")
+                list_index = 0
+                if len(camera_list) > 0:
+                    for camera in camera_list:
+                        print("index: ", list_index)
+                        camera_frame_image_actual_path = camera.get("camera_frame_image_actual_path")
+                        camera_frame_image_html_path = os.path.sep.join(
+                            [app.config["IMAGE_PATH_FOR_HTML"], os.path.basename(camera_frame_image_actual_path)])
+                        camera.update({"camera_frame_image_html_path": camera_frame_image_html_path})
+
+                        #camera_ip_address = camera.get("camera_ip_address")
+                        #ping_response = os.system("ping -c 1 " + camera_ip_address)
+                        #print("ping response: ", ping_response)
+                        #if ping_response == 0:
+                        if list_index % 2 == 0:
+                            camera.update({"camera_status": "Active"})
+                        else:
+                            camera.update({"camera_status": "Not Active"})
+                        list_index += 1
+
+
+                print("camera_list")
+
+                send_to_html_json = {
+                    'camera_list': camera_list,
+                    'message': "Please click on the cards to see live streaming from the camera.",
+                    'logged_in_user': user_name,
+                    'logged_in_user_type': user_type,
+                    'page_title': "Camera Activity Status"
+                }
+                session_values_json_redis.update({"ticket_status": "get_camera_status"})
+                redisCommands.redis_conn.set(jwt_details.get('logged_in_user_id'),
+                                             json.dumps(session_values_json_redis))
+                print('redis in get_camera_status: ', session_values_json_redis)
+                return render_template('camera_status.html', details=send_to_html_json)
 
     except Exception as error:
         exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         print(exc_type, "Exception in live_streaming of", fname, "at line number", exc_tb.tb_lineno, ":", error)
         send_to_html_json = {
-            'message': "An unexpected error has happened. The administration has been notified. Use the link below to continue.",
+            'message': "An unexpected error has happened. The administration has been notified. Use the link below to "
+                       "continue.",
             'page_title': "Error"
         }
         # print("custom_exception: ", send_to_html_json)
         return render_template('500.html', details=send_to_html_json), 500
+
+
+# Get Camera IP Addresses and Locations
+@app.route("/get_camera_ip_address_list", methods=['GET'])
+@jwt_required()
+def get_camera_ip_address_list():
+    print("In get_camera_ip_address_list: ", request.method)
+    try:
+        jwt_details = get_jwt_identity()
+        redis_parent_key = jwt_details.get('redis_parent_key')
+        session_values_json_redis = json.loads(redisCommands.redis_conn.get(redis_parent_key))
+
+        result = sqlCommands.get_camera_ip_address_list()
+        if not result or result.get('Status') == "Fail" or len(result.get("Details")) == 0:
+            session_values_json_redis.update(
+                {"message": "System was unable to retrieve the camera ip address list. Please try again."})
+            session_values_json_redis.update({"ticket_status": "detection_report"})
+            redisCommands.redis_conn.set(redis_parent_key, json.dumps(session_values_json_redis))
+            print("get location list failed")
+            print("redis in add_camera on list location fail: ", session_values_json_redis)
+            send_to_html_json = {
+                'message': "System was unable to retrieve the location list. Please try again",
+                'page_title': "Error"
+            }
+            return render_template('500.html', details=send_to_html_json), 500
+
+        else:
+            result = result.get("Details")
+            print('result ', result)
+            print('rows returned: ', len(result))
+            #camera_ip_list = []
+            #for camera in result:
+            #    camera_ip_list.append({
+            #        "location_name": location[0],
+            #        "location_id": location[1]
+            #    })
+            return result
+
+    except Exception as error:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exc_type, "Exception in get_camera_ip_address_list of", fname, "at line number", exc_tb.tb_lineno, ":", error)
+        send_to_html_json = {
+            'message': "An unexpected error has happened. The administrator has been notified. "
+                       "Use the link below to continue.",
+            'page_title': "Error"
+        }
+        print("custom_exception: ", send_to_html_json)
+        return render_template('500.html', details=send_to_html_json), 500
+
+
+# Get Camera IP Addresses and Locations
+@app.route("/get_detection_category_list", methods=['GET'])
+@jwt_required()
+def get_detection_category_list():
+    print("In get_detection_category_list: ", request.method)
+    try:
+        jwt_details = get_jwt_identity()
+        redis_parent_key = jwt_details.get('redis_parent_key')
+        session_values_json_redis = json.loads(redisCommands.redis_conn.get(redis_parent_key))
+
+        result = sqlCommands.get_detection_category_list()
+        if not result or result.get('Status') == "Fail" or len(result.get("Details")) == 0:
+            session_values_json_redis.update(
+                {"message": "System was unable to retrieve the detection category list. Please try again."})
+            session_values_json_redis.update({"ticket_status": "detection_report"})
+            redisCommands.redis_conn.set(redis_parent_key, json.dumps(session_values_json_redis))
+            print("get detection category list failed")
+            print("redis in get detection category list fail: ", session_values_json_redis)
+            send_to_html_json = {
+                'message': "System was unable to retrieve the detection category list. Please try again",
+                'page_title': "Error"
+            }
+            return render_template('500.html', details=send_to_html_json), 500
+
+        else:
+            result = result.get("Details")
+            print('result ', result)
+            print('rows returned: ', len(result))
+            # camera_ip_list = []
+            # for camera in result:
+            #    camera_ip_list.append({
+            #        "location_name": location[0],
+            #        "location_id": location[1]
+            #    })
+            return result
+
+    except Exception as error:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exc_type, "Exception in get_detection_category_list of", fname, "at line number", exc_tb.tb_lineno, ":", error)
+        send_to_html_json = {
+            'message': "An unexpected error has happened. The administratior has been notified. "
+                       "Use the link below to continue.",
+            'page_title': "Error"
+        }
+        print("custom_exception: ", send_to_html_json)
+        return render_template('500.html', details=send_to_html_json), 500
+
+
+# Get Camera IP Addresses and Locations
+@app.route("/get_location_list", methods=['GET'])
+@jwt_required()
+def get_location_list():
+    print("In get_location_list: ", request.method)
+    try:
+        jwt_details = get_jwt_identity()
+        redis_parent_key = jwt_details.get('redis_parent_key')
+        session_values_json_redis = json.loads(redisCommands.redis_conn.get(redis_parent_key))
+        source = request.args.get('source')
+        need = request.args.get('need')
+        print("ajax_data: ", source)
+        print("ajax_data: ", need)
+
+        result = sqlCommands.get_location_list()
+
+        if not result or result.get('Status') == "Fail" or len(result.get("Locations")) == 0:
+            session_values_json_redis.update(
+                {"message": "System was unable to retrieve the location list. Please try again."})
+            session_values_json_redis.update({"ticket_status": source})
+            redisCommands.redis_conn.set(redis_parent_key, json.dumps(session_values_json_redis))
+            print("get location list failed")
+            print("redis in get_location_list failed: ", session_values_json_redis)
+            send_to_html_json = {
+                'message': "System was unable to retrieve the location list. Please try again",
+                'page_title': "Error"
+            }
+            return render_template('500.html', details=send_to_html_json), 500
+
+        else:
+            location_list = result.get("Locations")
+            print('locations ', location_list)
+            return location_list
+
+    except Exception as error:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exc_type, "Exception in get_location_list of", fname, "at line number", exc_tb.tb_lineno, ":", error)
+        send_to_html_json = {
+            'message': "An unexpected error has happened. The administrator has been notified. "
+                       "Use the link below to continue.",
+            'page_title': "Error"
+        }
+        print("custom_exception: ", send_to_html_json)
+        return render_template('500.html', details=send_to_html_json), 500
+
+
+# Get Camera IP Addresses and Locations
+@app.route("/get_sub_location_list", methods=['GET'])
+@jwt_required()
+def get_sub_location_list():
+    print("In get_sub_location_list: ", request.method)
+    try:
+        jwt_details = get_jwt_identity()
+        redis_parent_key = jwt_details.get('redis_parent_key')
+        session_values_json_redis = json.loads(redisCommands.redis_conn.get(redis_parent_key))
+        source = request.args.get('source')
+        need = request.args.get('need')
+        location = request.args.get('location')
+
+        print("ajax_data: ", source)
+        print("ajax_data: ", need)
+        print("ajax_data: ", location)
+
+        result = sqlCommands.get_sub_location_list(location)
+
+        if not result or result.get('Status') == "Fail" or len(result.get("Sub_Locations")) == 0:
+            session_values_json_redis.update(
+                {"message": "System was unable to retrieve the sub location list. Please try again."})
+            session_values_json_redis.update({"ticket_status": source})
+            redisCommands.redis_conn.set(redis_parent_key, json.dumps(session_values_json_redis))
+            print("get location list failed")
+            print("redis in get_location_list failed: ", session_values_json_redis)
+            send_to_html_json = {
+                'message': "System was unable to retrieve the sub location list. Please try again",
+                'page_title': "Error"
+            }
+            return render_template('500.html', details=send_to_html_json), 500
+
+        else:
+            sub_location_list = result.get("Sub_Locations")
+            print('sub locations ', sub_location_list)
+            return sub_location_list
+
+    except Exception as error:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exc_type, "Exception in get_sub_location_list of", fname, "at line number", exc_tb.tb_lineno, ":", error)
+        send_to_html_json = {
+            'message': "An unexpected error has happened. The administrator has been notified. "
+                       "Use the link below to continue.",
+            'page_title': "Error"
+        }
+        print("custom_exception: ", send_to_html_json)
+        return render_template('500.html', details=send_to_html_json), 500
+

@@ -1,0 +1,41 @@
+{% extends "layout.html" %}
+{% block content %}
+<section class="user add-end-button-section">
+    <form id="form" action="{{ url_for('get_camera_status') }}" enctype="multipart/form-data" method="post">
+   		<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="card-container">
+            {% for camera in details.camera_list %}
+            <div class="card">
+                <img src="{{ camera.camera_frame_image_html_path}}">
+                <div class="card-content">
+                    {% if camera.camera_status == 'Active' %}
+                    <div class="light green"></div>
+                    {% elif camera.camera_status == 'Not Active' %}
+                    <div class="light red"></div>
+                    {% endif %}
+                    <h3>{{ camera.camera_ip_address }}</h3>
+                    <p>{{ camera.camera_ip_address }}</p>
+                    <p>{{ camera.camera_status }}</p>
+                    {% if camera.camera_status == 'Active' %}
+                    <a href=# onclick="send_rtsp('{{ camera.camera_rtsp_address }}')">Click to see live stream</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </form>
+</section>
+<script>
+	function send_rtsp(rtsp_address) {
+		alert(rtsp_address);
+		var form_element = document.getElementById('form');
+		var rtsp_address_element = document.createElement('input');
+		rtsp_address_element.type = 'hidden';
+		rtsp_address_element.name = 'rtsp_address';
+		rtsp_address_element.value = rtsp_address;
+		form_element.appendChild(rtsp_address_element); //add the array of lines
+		form_element.submit();
+	}
+</script>
+
+{% endblock content %}

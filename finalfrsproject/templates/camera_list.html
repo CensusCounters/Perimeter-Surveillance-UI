@@ -8,13 +8,14 @@
                 <thead>
                     <tr>
                         <th>Camera Location</th>
-                        <th>Camera Make</th>
+                        <th>Camera Sub Location</th>
                         <th>Camera IP Address</th>
+                        <th>Camera Make</th>
                         <th>Camera Username</th>
                         <th>Camera Password</th>
                         <th>Camera RTSP Address</th>
                         <th>Camera Region of Interest</th>
-                        <th>Associated AI Services</th>
+                        <th>AI Models</th>
                         <th>Click here to edit settings</th>
                     </tr>
                 </thead>
@@ -23,13 +24,14 @@
                     {% for camera in details.camera_list %}
                     <tr>
                         <td width="5%">{{ camera.location_name }}</td>
-                        <td width="5%">{{ camera.camera_make }}</td>
+                        <td width="5%">{{ camera.sub_location_name }}</td>
                         <td width="8%">{{ camera.camera_ip_address }}</td>
+                        <td width="5%">{{ camera.camera_make }}</td>
                         <td width="5%">{{ camera.camera_username }}</td>
                         <td width="5%">{{ camera.camera_password }}</td>
                         <td width="18%">{{ camera.camera_rtsp_address }}</td>
                         <td width="20%">{{ camera.camera_region_of_interest }}</td>
-                        <td width="17%">{{ camera.camera_associated_services }}</td>
+                        <td width="12%">{{ camera.camera_associated_services }}</td>
                         <td width="17%">
                             <button type="button" class="btn btn-primary" style="height: 80%; width:80%; font-size: 14px;" onclick="editCamera('{{ camera.id}}')">Edit
                             </button>

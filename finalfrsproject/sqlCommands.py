@@ -36,7 +36,7 @@ def login(user_name, password):
         # print(cursor.mogrify(sql,(arg)).decode('utf=8'))
         result = cursor.fetchone()
         # return result
-        result = {"Status": "Sucess", "Details": result}
+        result = {"Status": "Success", "Details": result}
 
     except (Exception, psycopg2.Error) as error:
         print("Error while executing PostgreSQL command", error)
@@ -70,12 +70,21 @@ def get_location_list():
 
         cursor = postgres_conn.cursor()
         # print('Created cursor')
-        sql = '''Select l.location_name, l.id from locations l;'''
+        sql = '''Select distinct l.location_name from locations l;'''
         arg = []
         cursor.execute(sql, (arg))
         print(cursor.mogrify(sql, (arg)).decode('utf=8'))
         result = cursor.fetchall()
-        result = {"Status": "Success", "Details": result}
+        location_list_with_sub_locations = []
+        location_list = []
+        column_names = [desc[0] for desc in cursor.description]
+        print("*****", column_names)
+        if len(result) > 0:
+            for location in result:
+                location_list.append(dict(zip(column_names, location)))
+        print("location list: ", location_list)
+
+        result = {"Status": "Success", "Locations": location_list}
 
     except (Exception, psycopg2.Error) as error:
         print("Error while executing PostgreSQL command", error)
@@ -88,6 +97,50 @@ def get_location_list():
             postgres_conn.close()
     return result
 
+
+def get_sub_location_list(location):
+    global postgres_conn
+    cursor = None
+    result = None
+    psycopg2.extras.register_uuid()
+
+    try:
+        if not postgres_conn:
+            connect_to_db()
+            # print('Just connected to Postgres DB')
+
+        if postgres_conn.closed != 0:
+            connect_to_db()
+            # print('Recreated connection')
+
+        cursor = postgres_conn.cursor()
+        # print('Created cursor')
+        sql = '''Select l.id, l.sub_location_name from locations l
+                    where location_name = %s;'''
+        arg = [location]
+        cursor.execute(sql, (arg))
+        print(cursor.mogrify(sql, (arg)).decode('utf=8'))
+        result = cursor.fetchall()
+        sub_location_list = []
+        column_names = [desc[0] for desc in cursor.description]
+        print("*****", column_names)
+        if len(result) > 0:
+            for location in result:
+                sub_location_list.append(dict(zip(column_names, location)))
+        print("location list: ", sub_location_list)
+
+        result = {"Status": "Success", "Sub_Locations": sub_location_list}
+
+    except (Exception, psycopg2.Error) as error:
+        print("Error while executing PostgreSQL command", error)
+        result = {"Status": "Fail", "Details": error}
+
+    finally:
+        # closing database connection.
+        if postgres_conn:
+            cursor.close()
+            postgres_conn.close()
+    return result
 
 def get_camera_ip_address_list():
     global postgres_conn
@@ -105,26 +158,36 @@ def get_camera_ip_address_list():
             # print('Recreated connection')
 
         cursor = postgres_conn.cursor()
-        # print('Created cursor')
-        sql = '''Select distinct c.camera_ip_address from cameras;'''
+        print('******Created cursor')
+        sql = '''Select distinct c.camera_ip_address from cameras c;'''
         arg = []
         cursor.execute(sql, (arg))
-        print(cursor.mogrify(sql, (arg)).decode('utf=8'))
+        print("*****",cursor.mogrify(sql, (arg)).decode('utf=8'))
         result = cursor.fetchall()
-        result = {"Status": "Success", "Details": result}
+        camera_ip_address_list = []
+        column_names = [desc[0] for desc in cursor.description]
+        print("*****",column_names)
+
+        if len(result) > 0:
+            for camera in result:
+                camera_ip_address_list.append(dict(zip(column_names, camera)))
+
+        print("result: ", camera_ip_address_list)
+        result = {"Status": "Success", "Details": camera_ip_address_list}
 
     except (Exception, psycopg2.Error) as error:
-        print("Error while executing PostgreSQL command", error)
+        print("Error while executing PostgreSQL command get_camera_ip_address", error)
         result = {"Status": "Fail", "Details": error}
 
-    finally:
+    #finally:
         # closing database connection.
-        if postgres_conn:
-            cursor.close()
-            postgres_conn.close()
+    #    if postgres_conn:
+    #        cursor_get_camera_ip_address_list.close()
+    #        postgres_conn.close()
     return result
 
-def get_detection_categories():
+
+def get_detection_category_list():
     global postgres_conn
     cursor = None
     result = None
@@ -146,15 +209,18 @@ def get_detection_categories():
         cursor.execute(sql, (arg))
         print(cursor.mogrify(sql, (arg)).decode('utf=8'))
         result = cursor.fetchall()
-        if result != None:
-            column_names = [desc[0] for desc in cursor.description]
-            result = dict(zip(column_names, result))
-        print("result: ", result)
+        column_names = [desc[0] for desc in cursor.description]
+        detection_category_list = []
+        if len(result) > 0:
+            for detection_category in result:
+                detection_category = list(detection_category)
+                detection_category_list.append(dict(zip(column_names, detection_category)))
+        print("result: ", detection_category_list)
 
-        result = {"Status": "Success", "Details": result}
+        result = {"Status": "Success", "Details": detection_category_list}
 
     except (Exception, psycopg2.Error) as error:
-        print("Error while executing PostgreSQL command", error)
+        print("Error while executing PostgreSQL command in get_detection_category_list", error)
         result = {"Status": "Fail", "Details": error}
 
     finally:
@@ -182,8 +248,8 @@ def get_rtsp_streams():
 
         cursor = postgres_conn.cursor()
         # print('Created cursor')
-        sql = '''Select distinct c.camera_ip_address as camera_ip_address, c.camera_rtsp_address as camera_rtsp_address 
-                    from cameras c where location_id = 1;'''
+        sql = '''Select distinct c.camera_ip_address as camera_ip_address, c.camera_rtsp_address as camera_rtsp_address, 
+                    c.camera_frame_image_actual_path from cameras c where location_id = 1;'''
         arg = []
         rtsp_list = []
         cursor.execute(sql, (arg))
@@ -195,7 +261,7 @@ def get_rtsp_streams():
                 for camera in result:
                     camera = list(camera)
                     rtsp_list.append(dict(zip(column_names, camera)))
-        #print("result: ", rtsp_list)
+        # print("result: ", rtsp_list)
         result = {"Status": "Success", "Details": rtsp_list}
 
     except (Exception, psycopg2.Error) as error:
@@ -208,7 +274,6 @@ def get_rtsp_streams():
             cursor.close()
             postgres_conn.close()
     return result
-
 
 
 def insert_new_camera_record(logged_in_user_id, camera_make, camera_ip_address, camera_username, camera_password,
@@ -324,9 +389,10 @@ def get_camera_list():
 
         cursor = postgres_conn.cursor()
         # print('Created cursor')
-        sql = '''Select c.camera_make, c.camera_ip_address, c.camera_username, c.camera_password, c.camera_rtsp_address, c.camera_region_of_interest, 
-                    c.camera_associated_services, c.location_id, l.location_name, c.camera_frame_image_actual_path, c.id from cameras c, locations l 
-                    where c.location_id = l.id;'''
+        sql = '''Select c.camera_make, c.camera_ip_address, c.camera_username, c.camera_password, c.camera_rtsp_address, 
+                c.camera_region_of_interest, c.camera_associated_services, c.location_id, l.location_name, 
+                c.camera_frame_image_actual_path, c.id, l.sub_location_name 
+                from cameras c, locations l where c.location_id = l.id;'''
         arg = []
         cursor.execute(sql, (arg))
         print(cursor.mogrify(sql, (arg)).decode('utf=8'))
@@ -372,8 +438,8 @@ def get_camera_details(camera_id):
         # print('Created cursor')
         sql = '''Select c.camera_make, c.camera_ip_address, c.camera_username, c.camera_password, 
         c.camera_rtsp_address, c.camera_region_of_interest, c.camera_associated_services, c.location_id, 
-        l.location_name, c.camera_frame_image_actual_path, c.id from cameras c, locations l where c.id = %s and 
-        c.location_id = l.id;'''
+        l.location_name, c.camera_frame_image_actual_path, c.id, l.sub_location_name from cameras c, locations l 
+        where c.id = %s and c.location_id = l.id;'''
 
         arg = [camera_id, ]
         cursor.execute(sql, (arg))
@@ -420,7 +486,7 @@ def get_detections_by_date(start_date, end_date, camera_ip_address, detection_ca
             sql = ''' select c.camera_ip_address as camera_ip_address, d.date_created as detection_time, d.frame_id as frame_id, 
                         d.detection_model as detection_model, d.detection_category as detection_category, 
                         d.bounding_boxes as bounding_box, detection_image_location as detection_image_location, 
-                        d.was_alert_sent as alert_status, d.alert_sent_time as alert_time from detections d, cameras c
+                        d.was_alert_sent as alert_status, d.alert_id as alert_time from detections d, cameras c
                         where d.date_created between %s and %s
                         and c.id = d.camera_id
                         order by d.date_created desc; '''
@@ -429,7 +495,7 @@ def get_detections_by_date(start_date, end_date, camera_ip_address, detection_ca
             sql = ''' select c.camera_ip_address as camera_ip_address, d.date_created as detection_time, d.frame_id as frame_id, 
                         d.detection_model as detection_model, d.detection_category as detection_category, 
                         d.bounding_boxes as bounding_box, detection_image_location as detection_image_location, 
-                        d.was_alert_sent as alert_status, d.alert_sent_time as alert_time from detections d, cameras c
+                        d.was_alert_sent as alert_status, d.alert_id as alert_time from detections d, cameras c
                         where d.date_created between %s and %s
                         and c.id = d.camera_id
                         and d.detection_category = %s

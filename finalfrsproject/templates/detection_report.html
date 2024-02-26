@@ -5,7 +5,7 @@
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input id="start_date" name="start_date" type="hidden">
         <input id="end_date" name="end_date" type="hidden">
-        <input id="report" name="report" type="hidden" value="person_report">
+        <input id="report" name="report" type="hidden" value="detection_report">
         <div id="img-vg-content-1" style="text-align: center;">
             <div class="col-xs-12">
                 <div class="searchbar-box">
@@ -14,19 +14,13 @@
             </div>
             <div class="col-xs-1"></div>
             <div class="col-xs-5">
-                <select name="camera_ip_address" id="camera_ip_address" class="form-control required">
+                <select name="camera_ip_address" id="camera_ip_address" class="form-control" required>
                     <option value="All" style="text-align: center;">Camera IP Address</option>
-                      {% for camera in details.camera_list %}
-                        <option value="{{ camera.camera_ip_address }}"> {{ camera.camera_ip_address }} </option>
-                      {% endfor %}
                 </select>
             </div>
             <div class="col-xs-5">
-                <select name="detection_category" id="detection_category" class="form-control required">
+                <select name="detection_category" id="detection_category" class="form-control" required>
                     <option value="All" style="text-align: center;">Detection Category</option>
-                      {% for category in details.detection_category_list %}
-                        <option value="{{ category.detection_category }}"> {{ category.detection_category }} </option>
-                      {% endfor %}
                 </select>
             </div>
             <div class="col-xs-1"></div>
@@ -118,8 +112,53 @@
     }
 
 $(document).ready(function(){
+
     document.getElementById("camera_ip_address").value = "{{ details.camera_ip_address }}";
     document.getElementById("detection_category").value = "{{ details.detection_category }}";
+
+    $.ajax({
+			url: "{{ url_for('get_camera_ip_address_list') }}",
+			type: "GET", // Type of Request
+			success: function (data) {
+				let camera_select_list = document.getElementById("camera_ip_address");
+				let camera_ip_list = JSON.stringify(data);
+				let camera_ip_list_json = JSON.parse(camera_ip_list);
+
+				for (var i = 0; i < camera_ip_list_json.length; i++) {
+    				camera = camera_ip_list_json[i]
+    				let option = document.createElement("option");
+                    option.value = camera.camera_ip_address;
+					option.text = camera.camera_ip_address;
+					camera_select_list.appendChild(option);
+    			}
+			},
+			// Error handling
+			error: function (error) {
+				console.log(`Error ${error}`);
+			}
+	});
+
+	$.ajax({
+        url: "{{ url_for('get_detection_category_list') }}",
+        type: "GET", // Type of Request
+        success: function (data) {
+            let detection_category_list = JSON.stringify(data);
+            let detection_category_list_json = JSON.parse(detection_category_list);
+            let category_select_list = document.getElementById("detection_category");
+            for (var i = 0; i < detection_category_list_json.length; i++) {
+                category = detection_category_list_json[i]
+                console.log(category)
+                var option = document.createElement("option");
+                option.value = category.detection_category;
+                option.text = category.detection_category;
+                category_select_list.appendChild(option);
+            }
+        },
+        // Error handling
+        error: function (error) {
+            console.log(`Error ${error}`);
+        }
+	});
 
     let start_date = null
     let end_date = null

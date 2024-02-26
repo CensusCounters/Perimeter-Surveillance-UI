@@ -7,14 +7,17 @@
           <form id="form" action="{{ url_for('add_camera') }}" class="login" method="post">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="form-group col-md-12">
-              <select name="camera_location" id="camera_location" class="form-control required">
+              <select name="camera_location" id="camera_location" class="form-control" onchange="get_sub_locations(this);" required>
                <option value="">Camera Location</option>
-               {% for location in details.locations %}
-                <option value="{{ location.location_id }},{{ location.location_name }}"> {{ location.location_name }} </option>
-               {% endfor %}
               </select>
             </div>
-            <div class="form-group col-md-12">
+            <div class="form-group col-md-12" id="sub_location_section" style="display:none">
+              <select name="camera_sub_location" id="camera_sub_location" class="form-control required">
+               <option value="">Camera Sub Location</option>
+              </select>
+            </div>
+
+            <div class="form-group col-md-12" id="camera_make_section" style="display:none">
               <select name="camera_make" id="camera_make" class="form-control required">
                 <option value="">Camera Make</option>
                 <option value="HikVision">HikVision</option>
@@ -23,16 +26,16 @@
                 <option value="Other">Other</option>
               </select>
             </div>
-            <div class="form-group col-md-12">
+            <div class="form-group col-md-12" id="camera_ip_section" style="display:none">
               <input id="camera_ip" name="camera_ip" type="text" class="form-control required" placeholder="Enter the Camera IP">
             </div>
-            <div class="form-group col-md-12">
+            <div class="form-group col-md-12" id="camera_username_section" style="display:none">
               <input id="camera_username" name="camera_username" type="text" class="form-control" placeholder="Enter the username for the camera">
             </div>
-            <div class="form-group col-md-12">
+            <div class="form-group col-md-12" id="camera_password_section" style="display:none">
               <input id="camera_password" name="camera_password" type="text" class="form-control" placeholder="Enter the password for the camera">
             </div>
-            <div class="col-xs-12 buttons text-center">
+            <div class="col-xs-12 buttons text-center" style="display:none" id="form_button_section">
               <button type="button" id="submit_form" class="c-btn" style="width:75%">Submit</button>
             </div>
           </form>
@@ -41,7 +44,66 @@
   	</div>
   </section>
   <script>
+    function get_sub_locations(location) {
+      $.ajax({
+        url: "{{ url_for('get_sub_location_list') }}",
+        type: "GET", // Type of Request
+        data: {
+          source: "add_camera",
+          need: "locations",
+          location: location.value
+        },
+        success: function (data) {
+          let sub_location_select_list = document.getElementById("camera_sub_location");
+          let sub_location_list = JSON.stringify(data);
+          let sub_location_list_json = JSON.parse(sub_location_list);
+          for (var i = 0; i < sub_location_list_json.length; i++) {
+            let option = document.createElement("option");
+            option.value = sub_location_list_json[i].id+","+sub_location_list_json[i].sub_location_name;
+            option.text = sub_location_list_json[i].sub_location_name;
+            sub_location_select_list.appendChild(option);
+          }
+        },
+        // Error handling
+        error: function (error) {
+            console.log(`Error ${error}`);
+        }
+	  });
+      $('#sub_location_section').show();
+      $('#camera_make_section').show();
+      $('#camera_ip_section').show();
+      $('#camera_username_section').show();
+      $('#camera_password_section').show();
+      $('#form_button_section').show();
+	}
+
     $(document).ready(function(){
+      $.ajax({
+          url: "{{ url_for('get_location_list') }}",
+          type: "GET", // Type of Request,
+          data: {
+            source: "add_camera",
+            need: "locations"
+          },
+          success: function (data) {
+            let location_select_list = document.getElementById("camera_location");
+            let location_list = JSON.stringify(data);
+            let location_list_json = JSON.parse(location_list);
+            console.log(location_list_json)
+
+            for (var i = 0; i < location_list_json.length; i++) {
+              let option = document.createElement("option");
+              option.value = location_list_json[i].location_name;
+              option.text = location_list_json[i].location_name;
+              location_select_list.appendChild(option);
+            }
+          },
+          // Error handling
+          error: function (error) {
+              console.log(`Error ${error}`);
+          }
+      });
+
 
       $.validator.addMethod('IP4Checker', function(value) {
           return value.match(/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/);
@@ -62,6 +124,9 @@
         },
         rules: {
           camera_location: {
+            required : true
+          },
+          camera_sub_location: {
             required : true
           },
           camera_make: {
