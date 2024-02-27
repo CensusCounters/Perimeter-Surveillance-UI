@@ -16,26 +16,21 @@
                         <th>Camera RTSP Address</th>
                         <th>Camera Region of Interest</th>
                         <th>AI Models</th>
-                        <th>Click here to edit settings</th>
                     </tr>
                 </thead>
                 <tbody>
                 {% if details.camera_list %}
                     {% for camera in details.camera_list %}
-                    <tr>
-                        <td width="5%">{{ camera.location_name }}</td>
-                        <td width="5%">{{ camera.sub_location_name }}</td>
+                    <tr onclick="editCamera('{{ camera.id}}')">
+                        <td width="10%">{{ camera.location_name }}</td>
+                        <td width="10%">{{ camera.sub_location_name }}</td>
                         <td width="8%">{{ camera.camera_ip_address }}</td>
                         <td width="5%">{{ camera.camera_make }}</td>
-                        <td width="5%">{{ camera.camera_username }}</td>
+                        <td width="10%">{{ camera.camera_username }}</td>
                         <td width="5%">{{ camera.camera_password }}</td>
-                        <td width="18%">{{ camera.camera_rtsp_address }}</td>
+                        <td width="20%">{{ camera.camera_rtsp_address|json_truncate }}</td>
                         <td width="20%">{{ camera.camera_region_of_interest|json_truncate }}</td>
                         <td width="12%">{{ camera.camera_associated_services }}</td>
-                        <td width="17%">
-                            <button type="button" class="btn btn-primary" style="height: 80%; width:80%; font-size: 14px;" onclick="editCamera('{{ camera.id}}')">Edit
-                            </button>
-                        </td>
                     </tr>
                     {% endfor %}
                 {% endif %}
@@ -46,14 +41,14 @@
 </section>
 
 <script>
-        function editCamera(camera_id) {
-            var form_element = document.getElementById('edit_camera_form');
-            var hidden_var = document.createElement('input');
-            hidden_var.type = 'hidden';
-            hidden_var.name = 'camera_id';
-            hidden_var.value = camera_id;
-            form_element.appendChild(hidden_var);
-           form_element.submit();
-        }
+    function editCamera(camera_id) {
+        var form_element = document.getElementById('edit_camera_form');
+        var hidden_var = document.createElement('input');
+        hidden_var.type = 'hidden';
+        hidden_var.name = 'camera_id';
+        hidden_var.value = camera_id;
+        form_element.appendChild(hidden_var);
+       form_element.submit();
+    }
 </script>
 {% endblock content %}

@@ -11,15 +11,15 @@
                 <div class="col-md-8">
                   <div class="form-group col-md-12">
                     <label>Location</label>
-                    <select name="camera_location" id="camera_location" class="form-control required" onchange="get_sub_locations(this);">
+                    <select name="camera_location" id="camera_location" class="form-control required" onchange="get_sub_locations(this.value);">
                      <option value="">Camera Location</option>
                     </select>
                   </div>
                   <div class="form-group col-md-12" id="sub_location_section">
                       <label>Sub Location</label>
                       <select name="camera_sub_location" id="camera_sub_location" class="form-control required">
-                     <option value="">Camera Sub Location</option>
-                    </select>
+                         <option value="">Camera Sub Location</option>
+                      </select>
                   </div>
                   <div class="form-group col-md-12" id="camera_make_section">
                        <label>Camera Make</label>
@@ -50,6 +50,7 @@
                 <div class="col-xs-12 buttons text-center" id="form_button_section">
                   <button type="button" id="submit_form" class="c-btn" style="width:75%">Submit</button>
                 </div>
+                </div>
             </div>
           </form>
         </div>
@@ -57,8 +58,33 @@
   </div>
 </section>
 <script>
+
+    function show_alert_model(title, message) {
+        Swal.fire({
+            title: title,
+            html: '<span style="font-size: 20px;font-color:"#ffd868">' + message + '</span>',
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#3085d6',
+            customClass: {
+                popup: 'my-popup-class',
+                confirmButton: 'my-confirm-button-class',
+                title: 'my-title-class',
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                console.log('OK button was clicked');
+                document.getElementById("camera_location").focus();
+            }
+        });
+    }
+
+
 function get_sub_locations(location) {
     console.log("location: ", location);
+    if (location == '') {
+        show_alert_model('Error','Please select a location to proceed');
+        return;
+    }
     $.ajax({
         url: "{{ url_for('get_sub_location_list') }}",
         type: "GET", // Type of Request
@@ -69,8 +95,16 @@ function get_sub_locations(location) {
         },
         success: function (data) {
             let sub_location_select_list = document.getElementById("camera_sub_location");
+            for (var i=0; i<sub_location_select_list.length; i++) {
+                if (sub_location_select_list.options[i].value != '') {
+                    sub_location_select_list.remove(i)
+                }
+            }
+            console.log(sub_location_select_list.length)
             let sub_location_list = JSON.stringify(data);
             let sub_location_list_json = JSON.parse(sub_location_list);
+            console.log("sub location length: " , sub_location_list_json.length)
+
             for (var i = 0; i < sub_location_list_json.length; i++) {
                 let option = document.createElement("option");
                 option.value = sub_location_list_json[i].id+","+sub_location_list_json[i].sub_location_name;
@@ -79,24 +113,19 @@ function get_sub_locations(location) {
             }
             selected_sub_location_from_database = "{{ details.camera_sub_location_name }}"
             selected_location_id_from_database = "{{ details.camera_location_id }}"
-
             console.log("selected_sub_location_from_database: ", selected_sub_location_from_database);
             sub_location_select_list.value = selected_location_id_from_database + "," + selected_sub_location_from_database;
         },
         // Error handling
         error: function (error) {
-            console.log(`Error ${error}`);
+            console.log(`Error in sub locations ${error}`);
+            show_alert_model('Error',error);
         }
     });
-    /*$('#sub_location_section').show();
-    $('#camera_make_section').show();
-    $('#camera_ip_section').show();
-    $('#camera_username_section').show();
-    $('#camera_password_section').show();
-    $('#form_button_section').show();*/
 }
 
 $(document).ready(function(){
+
   document.getElementById("camera_make").value = "{{ details.camera_make }}";
   document.getElementById("camera_ip_address").value = "{{ details.camera_ip_address }}"
   document.getElementById("camera_username").value = "{{ details.camera_username }}"
@@ -113,7 +142,7 @@ $(document).ready(function(){
         let location_select_list = document.getElementById("camera_location");
         let location_list = JSON.stringify(data);
         let location_list_json = JSON.parse(location_list);
-        console.log(location_list_json)
+        console.log("location length: " , location_list_json.length)
 
         for (var i = 0; i < location_list_json.length; i++) {
           let option = document.createElement("option");
@@ -123,13 +152,16 @@ $(document).ready(function(){
         }
         selected_location_from_database = "{{ details.camera_location_name }}"
         location_select_list.value = selected_location_from_database;
-        get_sub_locations(selected_location_from_database)
       },
       // Error handling
-      error: function (error) {
-          console.log(`Error ${error}`);
+      error: function (response) {
+          error = jQuery.parseJSON(response)
+          show_alert_model('error', error.message)
+          console.log(`Error in get locations ${error.message}`);
       }
   });
+ get_sub_locations("{{ details.camera_location_name }}")
+
 
   $.validator.addMethod('IP4Checker', function(value) {
       return value.match(/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/);

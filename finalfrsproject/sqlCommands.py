@@ -251,7 +251,8 @@ def get_rtsp_streams():
         cursor = postgres_conn.cursor()
         # print('Created cursor')
         sql = '''Select distinct c.camera_ip_address as camera_ip_address, c.camera_rtsp_address as camera_rtsp_address, 
-                    c.camera_frame_image_actual_path from cameras c where location_id = 1;'''
+                    c.camera_frame_image_actual_path, l.location_name, l.sub_location_name 
+                    from cameras c, locations l where c.location_id = l.id;'''
         arg = []
         rtsp_list = []
         cursor.execute(sql, (arg))

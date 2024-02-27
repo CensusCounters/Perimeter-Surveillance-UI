@@ -15,7 +15,7 @@
 		</div>
 		<div class="row" id="img-vg-content_2" style="margin-top:40px">
 			<div class="col-xs-12 buttons text-center">
-				<button type="submit" id="continue" name="continue" value="continue" class="c-btn" style="width:75%">Continue</button>
+				<button type="button" id="continue" name="continue" value="continue" class="c-btn" style="width:75%">Continue</button>
 			</div>
 		</div>
 	</form>
@@ -38,7 +38,11 @@
 		};
 		image.src = "{{ url_for('view_camera') }}";
 		document.getElementById('continue').addEventListener('click', function() {
+			alert("here 1");
 			document.getElementById('spinner').style.display = 'block';
+			alert("here 2");
+			document.getElementById('form').submit();
+			alert("here 3");
 		});
 	});
 </script>

@@ -733,7 +733,7 @@ table.dataTable{
 }
 .table>thead:first-child>tr:first-child>th{
     text-align: center;
-    border-bottom: 2px solid #2f2f2f;
+    border-bottom: 1px dotted #00ffe4;
     font-size: 18px;
     font-weight: lighter;
     color: #ffd868 !important;
@@ -743,6 +743,7 @@ table.dataTable{
 .table .forecast>thead:first-child>tr:first-child>th{
     /*color: var(--second-color) !important;*/
     color: #ffd868 !important;
+    border: 1px solid #00ffe4 !important;
 }
 
 .table-striped>tbody>tr:nth-of-type(odd) {
@@ -758,15 +759,22 @@ table.dataTable{
     padding:10px;
     font-size: 18px;
     font-weight: normal;
-    color: #878787;
+    color: #fff;
+    background: #000;
     vertical-align: middle;
+    text-align:center;
+    border-bottom: 1px;
+    border-style: dotted;
+    border-color: #00ffe4 !important;
 }
 .table>tbody>tr>td>.name,.table>tbody>tr>td>a{
     color:#00ffe4;
     text-decoration: none;
 }
 .table-striped>tbody>tr:hover{
-    background:#2f2f2f
+    cursor:pointer;
+    background:#000000;
+    border: 1px solid #00ffe4 !important;
 }
 input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button {
     -webkit-appearance: none;
@@ -978,13 +986,15 @@ h5 {
     height:55px;
     padding: 15px;
     border-radius: 0;
-    color: var(--second-font-color);
+    color: #fff;
+    /*color: var(--second-font-color);*/
     font-size: 16px;
 }
 .user .user-form select option {
     margin: 40px;
     background: #181818;
-    color:var(--second-font-color) !important;
+    color: #fff;
+    /*color:var(--second-font-color) !important;*/
     text-shadow: 0 1px 0 rgba(0, 0, 0, 0.4);
 }
 .user .user-form .btn{
@@ -1045,16 +1055,21 @@ h5 {
     color:#18afa2
 }
 .user .form-control::-webkit-input-placeholder {
-    font-style: italic
+    font-style: italic;
+    color: #fff;
 }
 .user .form-control:-moz-placeholder {
-    font-style: italic
+    font-style: italic;
+        color: #fff;
+
 }
 .user .form-control::-moz-placeholder {
-    font-style: italic
+    font-style: italic;
+    color: #fff;
 }
 .user .form-control:-ms-input-placeholder {
     font-style: italic
+    color: #fff;
 }
 /**********home page ********/
  .navbar-inverse.home-nav{
@@ -2353,7 +2368,7 @@ a:hover {
     padding: 0;
     border-radius: 15px;
 }
-#view_report {
+#view_report, #trip_report {
     width: 100%;    
     background: linear-gradient(to right, #03b7a5 0%, #029e8e 41%, #00665b 100%);
     border: 1px solid #03b7a5;
@@ -2370,10 +2385,10 @@ a:hover {
     background: transparent;
     color: #fff;
 }
-#edit_camera{
+#edit_camera, #camera_status{
     width: 100%;    
     background: linear-gradient(to right, #dddddd 0%, #dddddd 41%, #dddddd 100%);
-    border: 1px solid #ffffff;
+    border: 1px solid #ffffff !important;
     outline: none !important;
     box-shadow: none !important;
     color: #000;
@@ -2384,7 +2399,7 @@ a:hover {
     font-weight: bold;
 }
 
-#edit_camera:hover{
+#edit_camera, #camera_status:hover{
     background: transparent;
     color: #fff;
 }
@@ -2760,7 +2775,9 @@ a:hover {
 /* Sweetalert popup */
 .swal2-popup {
     background-color: #181818 !important;
-    color: white !important;
+    color: #ffd868 !important;
+    width: 600px !important;
+    border: 1px solid #ffd868 !important;
 }
 .swal2-styled.swal2-confirm {
     border: 1px solid #00B3A1 !important;

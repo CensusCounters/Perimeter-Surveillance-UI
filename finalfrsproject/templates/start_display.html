@@ -4,17 +4,19 @@
 	<form id="form" action="{{ url_for('start_display') }}" method="post" enctype="multipart/form-data">
 		<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="row" id="img-vg-content-0" style="text-align: center;">
-			<div class="col-xs-2"></div>
-			<div class="col-xs-8">
-                <select name="camera_rtsp_address" id="camera_rtsp_address" class="form-control" required>
+			<div class="col-xs-6">
+                <select name="camera_rtsp_address" id="camera_rtsp_address" class="form-control" required >
                     <option value="" style="text-align: center;">Camera IP Address</option>
 		             {% for camera in details.rtsp_list %}
                         <option id="{{ camera.camera_ip_address }}" value="{{ camera.camera_rtsp_address }} - {{ camera.camera_ip_address }} "> {{ camera.camera_ip_address }} </option>
                       {% endfor %}
                 </select>
             </div>
-			<div class="col-xs-2"></div>
-        </div>
+			<div class="col-xs-6">
+                <input type="text-area" name="alert_text_area" id="alert_text_area" rows="4" cols="50" class="form-control" required >
+                </input>
+            </div>
+		</div>
 		<div class="row" id="img-vg-content_1" style="margin-top:30px">
 			<div class="wbcam-col">
 				<div class="webcam_div" style="text-align: center; border: 3px solid #f29d0a; width:100%">
@@ -33,36 +35,20 @@
 	</form>
 </section>
 <script>
-	function set_rtsp(rtsp_address) {
-		alert("here")
-		const canvas = document.getElementById("canvas_picture");
-		canvas.style.width = "1000px";
-		canvas.style.height = "500px";
-		var context = canvas.getContext('2d');
-
-		var image = new Image();
-		image.onload = function () {
-			//update the message
-			message.innerText = "Success. The camera is now connected!"
-			// Clear the canvas
-			context.clearRect(0, 0, canvas.width, canvas.height);
-			//show spinner
-			document.getElementById('spinner').style.display = 'none';
-		};
-		image.src = "{{ url_for('live_streaming') }}";
-		document.getElementById('continue').addEventListener('click', function() {
-			document.getElementById('spinner').style.display = 'block';
-		});
-	}
 	$(document).ready(function(){
-		document.getElementById("camera_rtsp_address").options.namedItem("{{ details.selected_rtsp }}").selected=true;
-		//document.getElementById("camera_rtsp_address").text = "{{ details.selected_rtsp }}";
+		var rtsp = {{ details.rtsp_address }}
+		alert ("rtsp: ", rtsp)
+		if (rtsp != null) {
+			selected_rtsp = "{{ details.rtsp_address }}"
+			document.getElementById("camera_rtsp_address").options.namedItem(selected_rtsp).selected=true;
+		}
 		const canvas = document.getElementById("canvas_picture");
 		canvas.style.width = "1000px";
 		canvas.style.height = "500px";
 		var context = canvas.getContext('2d');
 		var image = new Image();
 		image.onload = function () {
+			alert("here")
 			//update the message
 			message.innerText = "Success. The camera is now connected!"
 			// Clear the canvas
