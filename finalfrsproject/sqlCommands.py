@@ -162,7 +162,7 @@ def get_camera_ip_address_list():
 
         cursor = postgres_conn.cursor()
         print('******Created cursor')
-        sql = '''Select distinct c.camera_ip_address, l.location_name, l.sub_location_name, c.id 
+        sql = '''Select distinct c.camera_ip_address, l.location_name, l.sub_location_name, c.id, c.camera_rtsp_address 
                 from cameras c, locations l
                 where c.location_id = l.id;'''
         arg = []

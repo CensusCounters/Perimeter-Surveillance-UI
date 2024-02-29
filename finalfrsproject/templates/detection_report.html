@@ -134,43 +134,43 @@ $(document).ready(function(){
   	{% endif %}
 
     $.ajax({
-			url: "{{ url_for('get_camera_ip_address_list') }}",
-			type: "GET", // Type of Request
-			success: function (data) {
-				let camera_select_list = document.getElementById("camera_identifier");
-				let camera_ip_list = JSON.stringify(data);
-				let camera_ip_list_json = JSON.parse(camera_ip_list);
+        url: "{{ url_for('get_camera_ip_address_list') }}",
+        type: "GET", // Type of Request
+        success: function (data) {
+            let camera_select_list = document.getElementById("camera_identifier");
+            let camera_ip_list = JSON.stringify(data);
+            let camera_ip_list_json = JSON.parse(camera_ip_list);
 
-				for (var i = 0; i < camera_ip_list_json.length; i++) {
-    				camera = camera_ip_list_json[i]
-    				let option = document.createElement("option");
-                    option.value = camera.id;
-					option.text = camera.location_name + "-" + camera.sub_location_name + "-" + camera.camera_ip_address;
-					camera_select_list.appendChild(option);
-    			}
-                if (camera_id != null) {
-                    document.getElementById("camera_identifier").value = camera_id ;
-                    console.log(document.getElementById("camera_identifier").value);
-                } else {
-                    console.log('No values to set');
-                }
-			},
-			// Error handling
-			error: function (xhr, status, errorThrown) {
-                if (xhr.status === 500) { // Check if the error is 500
-                    var errorResponse = JSON.parse(xhr.responseText); // Parse the JSON response
-                    console.log("Error Message: ", errorResponse.message);
-                    show_alert_model('Error', errorResponse.message);
-                } else {
-                    // Handle other types of errors
-                    show_alert_model('Error', errorResponse.message);
-                    console.log("An error occurred: ", status, errorThrown);
-                }
+            for (var i = 0; i < camera_ip_list_json.length; i++) {
+                camera = camera_ip_list_json[i]
+                let option = document.createElement("option");
+                option.value = camera.id;
+                option.text = camera.location_name + "-" + camera.sub_location_name + "-" + camera.camera_ip_address;
+                camera_select_list.appendChild(option);
             }
-			//error: function (error) {
-	        //    show_alert_model('error', error.message)
-    		//	console.log(`Error ${error}`);
-			//}
+            if (camera_id != null) {
+                document.getElementById("camera_identifier").value = camera_id ;
+                console.log(document.getElementById("camera_identifier").value);
+            } else {
+                console.log('No values to set');
+            }
+        },
+        // Error handling
+        error: function (xhr, status, errorThrown) {
+            if (xhr.status === 500) { // Check if the error is 500
+                var errorResponse = JSON.parse(xhr.responseText); // Parse the JSON response
+                console.log("Error Message: ", errorResponse.message);
+                show_alert_model('Error', errorResponse.message);
+            } else {
+                // Handle other types of errors
+                show_alert_model('Error', errorResponse.message);
+                console.log("An error occurred: ", status, errorThrown);
+            }
+        }
+        //error: function (error) {
+        //    show_alert_model('error', error.message)
+        //	console.log(`Error ${error}`);
+        //}
 	});
 
 	$.ajax({

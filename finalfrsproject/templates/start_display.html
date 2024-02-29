@@ -4,19 +4,21 @@
 	<form id="form" action="{{ url_for('start_display') }}" method="post" enctype="multipart/form-data">
 		<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="row" id="img-vg-content-0" style="text-align: center;">
+			<div class="col-xs-1"></div>
 			<div class="col-xs-6">
-                <select name="camera_rtsp_address" id="camera_rtsp_address" class="form-control" required >
-                    <option value="" style="text-align: center;">Camera IP Address</option>
-		             {% for camera in details.rtsp_list %}
-                        <option id="{{ camera.camera_ip_address }}" value="{{ camera.camera_rtsp_address }} - {{ camera.camera_ip_address }} "> {{ camera.camera_ip_address }} </option>
-                      {% endfor %}
+                <select name="camera_identifier" id="camera_identifier" class="form-control" required >
+                    <option value="TILED" style="text-align: center;">Camera IP Address</option>
                 </select>
             </div>
+			<div class="col-xs-4">
+				<button type="submit" id="continue" name="continue" value="continue" class="c-btn" style="margin:0px; width:80%">Continue</button>
+			</div>
+			<div class="col-xs-1"></div>
 		</div>
 		<div class="row" id="img-vg-content_1" style="margin-top:30px">
 			<div class="wbcam-col">
 				<div class="webcam_div" style="text-align: center; border: 3px solid #f29d0a; width:100%">
-					<canvas id="canvas_picture" style="width:1000px; height:500px; object-fit: cover; background-image: url({{ url_for('live_streaming') }})"></canvas>
+					<canvas id="canvas_picture" style="background-image: url({{ url_for('live_streaming') }})"></canvas>
 					<div id="spinner" style="position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%);">
 						<div class="css-spinner"></div>
 					</div>
@@ -24,29 +26,59 @@
 			</div>
 		</div>
 		<div class="row" id="img-vg-content_2" style="margin-top:40px">
-			<div class="col-xs-12 buttons text-center">
-				<button type="submit" id="continue" name="continue" value="continue" class="c-btn" style="width:75%">Continue</button>
-			</div>
+
 		</div>
 	</form>
 </section>
 <script>
 	$(document).ready(function(){
-		var rtsp = {{ details.rtsp_address }}
-		alert ("rtsp: ", rtsp)
-		if (rtsp != null) {
-			selected_rtsp = "{{ details.rtsp_address }}"
-			document.getElementById("camera_rtsp_address").options.namedItem(selected_rtsp).selected=true;
-		}
+		var camera_rtsp;
+		{% if details.camera_identifier %}
+			camera_identifier_from_server = "{{ details.camera_identifier }}";
+		{% endif %}
+		alert (camera_rtsp)
+		$.ajax({
+        url: "{{ url_for('get_camera_ip_address_list') }}",
+        type: "GET", // Type of Request
+        success: function (data) {
+            let camera_rtsp_select_list = document.getElementById("camera_identifier");
+            let camera_rtsp_list = JSON.stringify(data);
+            let camera_rtsp_list_json = JSON.parse(camera_rtsp_list);
+
+            for (var i = 0; i < camera_rtsp_list_json.length; i++) {
+                camera = camera_rtsp_list_json[i]
+                let option = document.createElement("option");
+                option.value = camera.id + "---" + camera.camera_rtsp_address;
+                option.text = camera.location_name + "-" + camera.sub_location_name + "-" + camera.camera_ip_address;
+                camera_rtsp_select_list.appendChild(option);
+            }
+            if (camera_identifier_from_server != null) {
+                camera_rtsp_select_list.value = camera_identifier_from_server ;
+            } else {
+                console.log('No values to set');
+            }
+        },
+        // Error handling
+        error: function (xhr, status, errorThrown) {
+            if (xhr.status === 500) { // Check if the error is 500
+                var errorResponse = JSON.parse(xhr.responseText); // Parse the JSON response
+                console.log("Error Message: ", errorResponse.message);
+                show_alert_model('Error', errorResponse.message);
+            } else {
+                // Handle other types of errors
+                show_alert_model('Error', errorResponse.message);
+                console.log("An error occurred: ", status, errorThrown);
+            }
+        }
+	});
 		const canvas = document.getElementById("canvas_picture");
-		canvas.style.width = "1000px";
-		canvas.style.height = "500px";
+		canvas.style.width = "1600px";
+		canvas.style.height = "800px";
 		var context = canvas.getContext('2d');
 		var image = new Image();
 		image.onload = function () {
-			alert("here")
 			//update the message
-			message.innerText = "Success. The camera is now connected!"
+			message.innerText = "Success. The camera is now connected! Please use the dropdown below to select a camera.";
 			// Clear the canvas
 			context.clearRect(0, 0, canvas.width, canvas.height);
 			//show spinner
