@@ -211,7 +211,7 @@ select.form-control{
     font-size: 18px;
 }
 select.form-control:focus{
- border-color:var(--main-color);
+    box-shadow: 0 0 1pt 1pt var(--main-color);
 }
 
    div.dataTables_length select{
@@ -2399,7 +2399,7 @@ a:hover {
     font-weight: bold;
 }
 
-#edit_camera, #camera_status:hover{
+#edit_camera:hover, #camera_status:hover{
     background: transparent;
     color: #fff;
 }
@@ -2774,9 +2774,9 @@ a:hover {
 }
 /* Sweetalert popup */
 .swal2-popup {
-    background-color: #181818 !important;
+    background-color: #000 !important;
     color: #ffd868 !important;
-    width: 600px !important;
+    width: 1000px !important;
     border: 1px solid #ffd868 !important;
 }
 .swal2-styled.swal2-confirm {
@@ -2785,7 +2785,9 @@ a:hover {
     color: black !important; /* For the button text color */
     background-color: #00B3A1 !important; /* Button background color */
     font-weight: bold !important;
-    width: 80px !important;
+    font-size: 16px;
+    width: 200px !important;
+    height: 50px !important;
     display: block !important;
     margin: 0 auto !important;
 }
@@ -2816,7 +2818,7 @@ a:hover {
     display:flex;
     justify-content: center;
     flex-wrap: wrap;
-    margin-top:100px;
+    /*margin-top:100px;*/
 }
 .card {
     width:325px;
@@ -2831,6 +2833,7 @@ a:hover {
     height: auto
 }
 .card-content {
+    text-align:center;
     padding:16px;
 }
 .card-content h3{
@@ -2838,21 +2841,29 @@ a:hover {
     margin-bottom: 8px;
 }
 .card-content p{
-    font-size:24px;
-    line-height:1.3;
+    font-size:22px;
+    line-height:1.1;
 }
+.card-content a{
+    font-size:20px;
+    line-height:1.1;
+}
+
 .light {
     width: 30px;
     height: 30px;
     border-radius: 50%;
     margin: 10px;
     transition: background-color 0.9s;
+    text-align: center;
 }
 .red {
+    margin-left: 45%;
     background-color: red;
-    animation: blinkRed 3s infinite;
+    animation: blinkRed 2s infinite;
 }
 .green {
+   margin-left: 45%;
    background: linear-gradient(to right, #74d680 0%, #378b29 100%);
 }
 @keyframes blinkRed {
@@ -2875,6 +2886,20 @@ a:hover {
     margin-top: 16px;
     color: #fff
 }
+
+.label {
+    display: block;
+    width: 100%;
+    line-height: 1.42857143;
+    height: 55px;
+    padding: 15px;
+    background: transparent;
+    font-size: 16px;
+    font-weight:"400";
+    text-align: right;
+    color: #ffd868;
+}
+
 
 /* media -- */
 

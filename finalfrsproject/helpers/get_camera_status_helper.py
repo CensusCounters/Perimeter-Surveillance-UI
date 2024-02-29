@@ -1,18 +1,20 @@
-import json
+import json, os
 from finalfrsproject import app, sqlCommands
 from flask import redirect, url_for, render_template
 
 def get_handler(jwt_details, redis_conn):
+    redis_parent_key = jwt_details.get('redis_parent_key')
     user_name = jwt_details.get("logged_in_user_name")
     user_type = jwt_details.get("logged_in_user_type")
-    session_values_json_redis = json.loads(redis_conn.get(jwt_details.get('logged_in_user_id')))
+    session_values_json_redis = json.loads(redis_conn.get(redis_parent_key))
+
     result = sqlCommands.get_rtsp_streams()
     print("********************************: ", result)
     if not result or result.get('Status') == "Fail" or len(result) == 0:
         print("get rtsp stream query failed")
         send_to_html_json = {
-            'message': "An unexpected error occurred while retrieving rtsp streams. Please use the link below to "
-                        "continue.",
+            'message': "An unexpected error occurred while retrieving rtsp streams. "
+                       "Please use the link below to continue.",
             'logged_in_user': user_name,
             'logged_in_user_type': user_type,
             'page_title': "Error"
@@ -46,7 +48,6 @@ def get_handler(jwt_details, redis_conn):
                     camera.update({"camera_status": "Not Active"})
                 list_index += 1
 
-
         print("camera_list")
 
         send_to_html_json = {
@@ -64,9 +65,9 @@ def get_handler(jwt_details, redis_conn):
 
 
 def post_handler(jwt_details, redis_conn, form):
-    user_name = jwt_details.get("logged_in_user_name")
-    user_type = jwt_details.get("logged_in_user_type")
-    session_values_json_redis = json.loads(redis_conn.get(jwt_details.get('logged_in_user_id')))
+    redis_parent_key = jwt_details.get('redis_parent_key')
+    session_values_json_redis = json.loads(redis_conn.get(redis_parent_key))
     print("form: ", form)
     session_values_json_redis.update({"rtsp_for_display:":form.get("rtsp_address")})
+    redis_conn.set(jwt_details.get('redis_parent_key'), json.dumps(session_values_json_redis))
     return redirect(url_for('start_display'))

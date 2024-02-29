@@ -92,11 +92,11 @@ def get_location_list():
         print("Error while executing PostgreSQL command", error)
         result = {"Status": "Fail", "Details": error}
 
-    finally:
+    #finally:
         # closing database connection.
-        if postgres_conn:
-            cursor.close()
-            postgres_conn.close()
+        #if postgres_conn:
+        #    cursor.close()
+        #    postgres_conn.close()
     return result
 
 
@@ -144,6 +144,7 @@ def get_sub_location_list(location):
             postgres_conn.close()
     return result
 
+
 def get_camera_ip_address_list():
     global postgres_conn
     cursor = None
@@ -161,7 +162,9 @@ def get_camera_ip_address_list():
 
         cursor = postgres_conn.cursor()
         print('******Created cursor')
-        sql = '''Select distinct c.camera_ip_address from cameras c;'''
+        sql = '''Select distinct c.camera_ip_address, l.location_name, l.sub_location_name, c.id 
+                from cameras c, locations l
+                where c.location_id = l.id;'''
         arg = []
         cursor.execute(sql, (arg))
         print("*****",cursor.mogrify(sql, (arg)).decode('utf=8'))
@@ -184,7 +187,7 @@ def get_camera_ip_address_list():
     #finally:
         # closing database connection.
     #    if postgres_conn:
-    #        cursor_get_camera_ip_address_list.close()
+    #        cursor.close()
     #        postgres_conn.close()
     return result
 
@@ -206,7 +209,7 @@ def get_detection_category_list():
 
         cursor = postgres_conn.cursor()
         # print('Created cursor')
-        sql = '''Select distinct d.detection_category from detection_categories d;'''
+        sql = '''Select distinct d.detection_category, d.id from detection_categories d;'''
         arg = []
         cursor.execute(sql, (arg))
         print(cursor.mogrify(sql, (arg)).decode('utf=8'))
@@ -225,11 +228,11 @@ def get_detection_category_list():
         print("Error while executing PostgreSQL command in get_detection_category_list", error)
         result = {"Status": "Fail", "Details": error}
 
-    finally:
+    #finally:
         # closing database connection.
-        if postgres_conn:
-            cursor.close()
-            postgres_conn.close()
+        #if postgres_conn:
+        #    cursor.close()
+        #    postgres_conn.close()
     return result
 
 
@@ -466,15 +469,16 @@ def get_camera_details(camera_id):
     return result
 
 
-def get_detections_by_date(start_date, end_date, camera_ip_address, detection_category):
+#def get_detections_by_date(start_date, end_date, camera_ip_address, location_id, sub_location_name, detection_category):
+def get_detections_by_date(start_date, end_date, camera_id, detection_category_id):
     global postgres_conn
     sql = None
     arg = None
     cursor = None
     result = None
     psycopg2.extras.register_uuid()
-    print(camera_ip_address)
-    print(detection_category)
+    print("camera_id: ", camera_id)
+    print("detection_category_id: ", detection_category_id)
 
     try:
         if not postgres_conn:
@@ -485,35 +489,53 @@ def get_detections_by_date(start_date, end_date, camera_ip_address, detection_ca
 
         cursor = postgres_conn.cursor()
 
-        if camera_ip_address == 'All' and detection_category == 'All':
-            sql = ''' select c.camera_ip_address as camera_ip_address, d.date_created as detection_time, d.frame_id as frame_id, 
-                        d.detection_model as detection_model, d.detection_category as detection_category, 
-                        d.bounding_boxes as bounding_box, detection_image_location as detection_image_location, 
-                        d.was_alert_sent as alert_status, d.alert_id as alert_time from detections d, cameras c
-                        where d.date_created between %s and %s
-                        and c.id = d.camera_id
-                        order by d.date_created desc; '''
+        if camera_id is None and detection_category_id is None:
+            print('All + All')
+            sql = ''' select c.camera_ip_address as camera_ip_address, d.date_created as detection_time, 
+            d.frame_id as frame_id, dm.detection_model as detection_model, dc.detection_category as detection_category, 
+            d.bounding_boxes as bounding_box, detection_image_location as detection_image_location, 
+            d.was_alert_sent as alert_status, a.date_created as alert_time, l.location_name as location_name, 
+            l.sub_location_name as sub_location_name from detections d, cameras c, locations l, alerts a, 
+            detection_categories dc, detection_models dm where d.date_created between %s and %s
+            and c.id = d.camera_id and c.location_id = l.id and d.alert_id = a.id and d.detection_category_id = dc.id
+            and d.detection_model_id = dm.id order by d.date_created desc; '''
             arg = [start_date, end_date]
-        elif camera_ip_address == 'All' and detection_category != 'All':
-            sql = ''' select c.camera_ip_address as camera_ip_address, d.date_created as detection_time, d.frame_id as frame_id, 
-                        d.detection_model as detection_model, d.detection_category as detection_category, 
-                        d.bounding_boxes as bounding_box, detection_image_location as detection_image_location, 
-                        d.was_alert_sent as alert_status, d.alert_id as alert_time from detections d, cameras c
-                        where d.date_created between %s and %s
-                        and c.id = d.camera_id
-                        and d.detection_category = %s
-                        order by d.date_created desc; '''
-            arg = [start_date, end_date, detection_category]
+        elif camera_id is None and detection_category_id is not None:
+            sql = ''' select c.camera_ip_address as camera_ip_address, d.date_created as detection_time, 
+            d.frame_id as frame_id, dm.detection_model as detection_model, dc.detection_category as detection_category, 
+            d.bounding_boxes as bounding_box, detection_image_location as detection_image_location, 
+            d.was_alert_sent as alert_status, a.date_created as alert_time, l.location_name as location_name, 
+            l.sub_location_name as sub_location_name from detections d, cameras c, locations l, alerts a,
+            detection_categories dc, detection_models dm where d.date_created between %s and %s
+            and dc.id = %s
+            and c.id = d.camera_id and c.location_id = l.id and d.alert_id = a.id and d.detection_category_id = dc.id
+            and d.detection_model_id = dm.id
+            order by d.date_created desc; '''
+            arg = [start_date, end_date, detection_category_id]
+        elif camera_id is not None and detection_category_id is None:
+            sql = ''' select c.camera_ip_address as camera_ip_address, d.date_created as detection_time, 
+            d.frame_id as frame_id, dm.detection_model as detection_model, dc.detection_category as detection_category, 
+            d.bounding_boxes as bounding_box, detection_image_location as detection_image_location, 
+            d.was_alert_sent as alert_status, a.date_created as alert_time, l.location_name as location_name, 
+            l.sub_location_name as sub_location_name from detections d, cameras c, locations l, alerts a, 
+            detection_categories dc, detection_models dm where d.date_created between %s and %s
+            and c.id = %s
+            and c.id = d.camera_id and c.location_id = l.id and d.alert_id = a.id and d.detection_category_id = dc.id
+            and d.detection_model_id = dm.id
+            order by d.date_created desc; '''
+            arg = [start_date, end_date, camera_id]
         else:
-            sql = ''' select c.camera_ip_address as camera_ip_address, d.date_created as detection_time, d.frame_id as frame_id, 
-                        d.detection_model as detection_model, d.detection_category as detection_category, 
-                        d.bounding_boxes as bounding_box, detection_image_location as detection_image_location, 
-                        d.was_alert_sent as alert_status, d.alert_sent_time as alert_time from detections d, cameras c
-                        where d.date_created between %s and %s
-                        and c.id = d.camera_id
-                        and c.camera_ip_address = %s
-                        order by d.date_created desc; '''
-            arg = [start_date, end_date, camera_ip_address]
+            sql = ''' select c.camera_ip_address as camera_ip_address, d.date_created as detection_time, 
+            d.frame_id as frame_id, dm.detection_model as detection_model, dc.detection_category as detection_category, 
+            d.bounding_boxes as bounding_box, detection_image_location as detection_image_location, 
+            d.was_alert_sent as alert_status, a.date_created as alert_time, l.location_name, l.sub_location_name 
+            from detections d, cameras c, locations l, alerts a, detection_categories dc, detection_models dm 
+            where d.date_created between %s and %s
+            and c.id = %s and dc.id = %s 
+            and c.id = d.camera_id and c.location_id = l.id and d.alert_id = a.id and d.detection_category_id = dc.id
+            and d.detection_model_id = dm.id
+            order by d.date_created desc; '''
+            arg = [start_date, end_date, camera_id, detection_category_id]
 
         cursor.execute(sql, arg)
         print(cursor.mogrify(sql, arg).decode('utf=8'))
@@ -550,7 +572,9 @@ def get_detections_by_date(start_date, end_date, camera_ip_address, detection_ca
                 'detection_category': 'No records found',
                 'bounding_box': 'No records found',
                 'alert_status': 'No records found',
-                'alert_time': 'No records found'
+                'alert_time': 'No records found',
+                'location_name': 'No records found',
+                'sub_location_name': 'No records found',
             })
 
         # print("detection_list: ", detection_list)

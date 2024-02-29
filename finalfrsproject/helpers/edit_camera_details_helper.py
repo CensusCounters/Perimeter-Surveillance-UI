@@ -3,6 +3,9 @@ from flask import render_template
 
 def get_handler(jwt_details, redis_conn):
     redis_parent_key = jwt_details.get('redis_parent_key')
+    print("redis parent key: ", redis_parent_key)
+    #1platform_ui
+    #1platform_ui
     session_values_json_redis = json.loads(redis_conn.get(redis_parent_key))
 
     print("redis before edit_camera_html: ", session_values_json_redis)
@@ -30,18 +33,15 @@ def post_handler(jwt_details, redis_conn, form):
     session_values_json_redis = json.loads(redis_conn.get(redis_parent_key))
 
     print("form: ", form)
-    camera_location = form.get('camera_location')
+    camera_location_name = form.get('camera_location')
     camera_sub_location = form.get('camera_sub_location')
     camera_location_id = camera_sub_location.split(",")[0]
-    camera_location_name = camera_sub_location.split(",")[1]
+    camera_sub_location_name = camera_sub_location.split(",")[1]
     camera_make = form.get('camera_make')
     camera_ip_address = form.get('camera_ip_address')
     camera_username = form.get('camera_username')
-    #camera_username = camera_username.split(" - ")[1]
     camera_password = form.get('camera_password')
-    #camera_password = camera_password.split(" - ")[1]
     camera_rtsp_address = form.get('camera_rtsp_address')
-    #camera_rtsp_address = camera_rtsp_address.split(" - ")[1]
     camera_id = form.get('camera_id')
     camera_to_edit = session_values_json_redis.get('camera_to_be_edited')
     camera_region_of_interest = camera_to_edit[0].get('camera_region_of_interest')
@@ -49,6 +49,7 @@ def post_handler(jwt_details, redis_conn, form):
     camera_frame_image_actual_path = camera_to_edit[0].get('camera_frame_image_actual_path')
     camera_to_edit = [{
         'camera_location_name': camera_location_name,
+        'camera_sub_location_name': camera_sub_location_name,
         'camera_make': camera_make,
         'camera_ip_address': camera_ip_address,
         'camera_username': camera_username,

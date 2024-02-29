@@ -1,6 +1,7 @@
 import json
-from flask import render_template
+from flask import render_template, jsonify
 from finalfrsproject import sqlCommands
+
 
 def camera_ip_address_list(jwt_details, redis_conn):
     redis_parent_key = jwt_details.get('redis_parent_key')
@@ -15,16 +16,18 @@ def camera_ip_address_list(jwt_details, redis_conn):
         print("get location list failed")
         print("redis in add_camera on list location fail: ", session_values_json_redis)
         send_to_html_json = {
-            'message': "System was unable to retrieve the location list. Please try again",
+            'message': "System was unable to retrieve the camera list. Please try again.",
             'page_title': "Error"
         }
-        return render_template('500.html', details=send_to_html_json), 500
+        #return render_template('500.html', details=send_to_html_json), 500
+        return jsonify(send_to_html_json), 500
     else:
         result = result.get("Details")
         print('result ', result)
         print('rows returned: ', len(result))
         return result
-    
+
+
 def detection_category_list(jwt_details, redis_conn):
     redis_parent_key = jwt_details.get('redis_parent_key')
     session_values_json_redis = json.loads(redis_conn.get(redis_parent_key))
@@ -41,8 +44,8 @@ def detection_category_list(jwt_details, redis_conn):
             'message': "System was unable to retrieve the detection category list. Please try again",
             'page_title': "Error"
         }
-        return render_template('500.html', details=send_to_html_json), 500
-
+        #return render_template('500.html', details=send_to_html_json), 500
+        return jsonify(send_to_html_json), 500
     else:
         result = result.get("Details")
         print('result ', result)
@@ -70,8 +73,8 @@ def location_list(jwt_details, redis_conn, request):
             'message': "System was unable to retrieve the location list. Please try again",
             'page_title': "Error"
         }
-        return render_template('500.html', details=send_to_html_json), 500
-
+        #return render_template('500.html', details=send_to_html_json), 500
+        return jsonify(send_to_html_json), 500
     else:
         location_list = result.get("Locations")
         print('locations ', location_list)
@@ -101,7 +104,8 @@ def sub_location_list(jwt_details, redis_conn, request):
             'message': "System was unable to retrieve the sub location list. Please try again",
             'page_title': "Error"
         }
-        return render_template('500.html', details=send_to_html_json), 500
+        #return render_template('500.html', details=send_to_html_json), 500
+        return jsonify(send_to_html_json), 500
 
     else:
         sub_location_list = result.get("Sub_Locations")

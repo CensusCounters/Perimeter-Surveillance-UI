@@ -4,7 +4,7 @@
 <head>
   <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
-<script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+<!--<script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
     <script type="text/javascript" charset="utf-8">
         var socket = io();
         socket.on('new_message', function(msg) {
@@ -57,7 +57,7 @@
               }
           });
         });
-</script>
+</script>-->
 <section class="user add-end-button-section">
   <div class="container-fluid" style="width:90%;">
     <form id="form" action="{{ url_for('home') }}" enctype="multipart/form-data" method="post">

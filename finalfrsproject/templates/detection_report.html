@@ -14,13 +14,13 @@
             </div>
             <div class="col-xs-1"></div>
             <div class="col-xs-5">
-                <select name="camera_ip_address" id="camera_ip_address" class="form-control" required>
-                    <option value="All" style="text-align: center;">Camera IP Address</option>
+                <select name="camera_identifier" id="camera_identifier" class="form-control">
+                    <option value="" style="text-align: center;">All Cameras</option>
                 </select>
             </div>
             <div class="col-xs-5">
-                <select name="detection_category" id="detection_category" class="form-control" required>
-                    <option value="All" style="text-align: center;">Detection Category</option>
+                <select name="detection_category" id="detection_category" class="form-control">
+                    <option value="" style="text-align: center;">All Detection Categories</option>
                 </select>
             </div>
             <div class="col-xs-1"></div>
@@ -35,6 +35,8 @@
                         <th>Detection Time</th>
                         <th>Detection Model</th>
                         <th>Detection Category</th>
+                        <th>Location</th>
+                        <th>Sub Location</th>
                         <th>Camera ID</th>
                         <th>Frame ID</th>
                         <th>Detection Image</th>
@@ -46,19 +48,21 @@
                 {% if details.detection_report_list %}
                 {% for detection in details.detection_report_list %}
                 <tr>
-                    <td>{{ detection.detection_time }}</td>
-                    <td>{{ detection.detection_model }}</td>
-                    <td>{{ detection.detection_category }}</td>
-                    <td>{{ detection.camera_ip_address }}</td>
-                    <td>{{ detection.frame_id }}</td>
+                    <td width="10%">{{ detection.detection_time }}</td>
+                    <td width="10%">{{ detection.detection_model }}</td>
+                    <td width="10%">{{ detection.detection_category }}</td>
+                    <td width="10%">{{ detection.location_name }}</td>
+                    <td width="10%">{{ detection.sub_location_name }}</td>
+                    <td width="10%">{{ detection.camera_ip_address }}</td>
+                    <td width="10%">{{ detection.frame_id }}</td>
                     {% if detection.detection_image_location %}
-                    <td>
+                    <td width="10%">
                         <a href="javascript:show_modal('{{ detection.detection_time }}','{{ detection.detection_image_location }}')">Click here</a></td>
                     {% else %}
-                    <td>No records found</td>
+                    <td width="10%">No records found</td>
                     {% endif %}
-                    <td>{{ detection.alert_status }}</td>
-                    <td>{{ detection.alert_time }}</td>
+                    <td width="10%">{{ detection.alert_status }}</td>
+                    <td width="10%">{{ detection.alert_time }}</td>
                 </tr>
                 {% endfor %}
 
@@ -85,57 +89,88 @@
 </section>
 
 <script>
-
-    function show_modal(vehicle_plate_number, vehicle_image) {
-        
-       // Get the modal
-        var modal = document.getElementById("myModal");
-
-        // Get the image and insert it inside the modal - use its "alt" text as a caption
-        //var img = document.getElementById("myImg");
-        var modalImg = document.getElementById("img01");
-        modalImg.src = vehicle_image;
-        var captionText = document.getElementById("caption");
-       //#img.onclick = function(){
-        modal.style.display = "block";
-        
-        captionText.innerHTML = vehicle_plate_number//this.alt;
-        //}
-
-        // Get the <span> element that closes the modal
-        var span = document.getElementsByClassName("close")[0];
-
-        // When the user clicks on <span> (x), close the modal
-        span.onclick = function() {
-            modal.style.display = "none";
+function show_alert_model(title, message) {
+    Swal.fire({
+        title: title,
+        html: '<span style="font-size: 20px;font-color:"#ffd868">' + message + '</span>',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#3085d6',
+        customClass: {
+            popup: 'my-popup-class',
+            confirmButton: 'my-confirm-button-class',
+            title: 'my-title-class',
         }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            console.log('OK button was clicked');
+            document.getElementById("camera_location").focus();
+        }
+    });
+}
+function show_modal(vehicle_plate_number, vehicle_image) {
+   // Get the modal
+    var modal = document.getElementById("myModal");
+    // Get the image and insert it inside the modal - use its "alt" text as a caption
+    var modalImg = document.getElementById("img01");
+    modalImg.src = vehicle_image;
+    var captionText = document.getElementById("caption");
+    modal.style.display = "block";
+    captionText.innerHTML = vehicle_plate_number//this.alt;
+    // Get the <span> element that closes the modal
+    var span = document.getElementsByClassName("close")[0];
+    // When the user clicks on <span> (x), close the modal
+    span.onclick = function() {
+        modal.style.display = "none";
     }
+}
 
 $(document).ready(function(){
-
-    document.getElementById("camera_ip_address").value = "{{ details.camera_ip_address }}";
-    document.getElementById("detection_category").value = "{{ details.detection_category }}";
+	let camera_id, detection_category_id, camera_ip, location_name, sub_location_name;
+	{% if details.camera_id %}
+	    camera_id = "{{ details.camera_id }}";
+	{% endif %}
+    {% if details.detection_category_id %}
+        detection_category_id = "{{ details.detection_category_id }}"
+  	{% endif %}
 
     $.ajax({
 			url: "{{ url_for('get_camera_ip_address_list') }}",
 			type: "GET", // Type of Request
 			success: function (data) {
-				let camera_select_list = document.getElementById("camera_ip_address");
+				let camera_select_list = document.getElementById("camera_identifier");
 				let camera_ip_list = JSON.stringify(data);
 				let camera_ip_list_json = JSON.parse(camera_ip_list);
 
 				for (var i = 0; i < camera_ip_list_json.length; i++) {
     				camera = camera_ip_list_json[i]
     				let option = document.createElement("option");
-                    option.value = camera.camera_ip_address;
-					option.text = camera.camera_ip_address;
+                    option.value = camera.id;
+					option.text = camera.location_name + "-" + camera.sub_location_name + "-" + camera.camera_ip_address;
 					camera_select_list.appendChild(option);
     			}
+                if (camera_id != null) {
+                    document.getElementById("camera_identifier").value = camera_id ;
+                    console.log(document.getElementById("camera_identifier").value);
+                } else {
+                    console.log('No values to set');
+                }
 			},
 			// Error handling
-			error: function (error) {
-				console.log(`Error ${error}`);
-			}
+			error: function (xhr, status, errorThrown) {
+                if (xhr.status === 500) { // Check if the error is 500
+                    var errorResponse = JSON.parse(xhr.responseText); // Parse the JSON response
+                    console.log("Error Message: ", errorResponse.message);
+                    show_alert_model('Error', errorResponse.message);
+                } else {
+                    // Handle other types of errors
+                    show_alert_model('Error', errorResponse.message);
+                    console.log("An error occurred: ", status, errorThrown);
+                }
+            }
+			//error: function (error) {
+	        //    show_alert_model('error', error.message)
+    		//	console.log(`Error ${error}`);
+			//}
 	});
 
 	$.ajax({
@@ -147,17 +182,32 @@ $(document).ready(function(){
             let category_select_list = document.getElementById("detection_category");
             for (var i = 0; i < detection_category_list_json.length; i++) {
                 category = detection_category_list_json[i]
-                console.log(category)
                 var option = document.createElement("option");
-                option.value = category.detection_category;
+                option.value = category.id;
                 option.text = category.detection_category;
                 category_select_list.appendChild(option);
             }
+            if (detection_category_id != null) {
+                document.getElementById("detection_category").value = detection_category_id;
+            }
         },
         // Error handling
-        error: function (error) {
-            console.log(`Error ${error}`);
+        error: function (xhr, status, errorThrown) {
+            if (xhr.status === 500) { // Check if the error is 500
+                var errorResponse = JSON.parse(xhr.responseText); // Parse the JSON response
+                console.log("Error Message: ", errorResponse.message);
+                show_alert_model('Error', errorResponse.message);
+            } else {
+                // Handle other types of errors
+                show_alert_model('Error', errorResponse.message);
+                console.log("An error occurred: ", status, errorThrown);
+            }
         }
+
+        //error: function (error) {
+        //  show_alert_model('error', error.message)
+        //  console.log(`Error in get locations ${error.message}`);
+       // }
 	});
 
     let start_date = null
@@ -207,8 +257,62 @@ $(document).ready(function(){
         }
     });
     $("#download").click(function() {
-       $('#form').attr('action', '{{ url_for('download_report') }}');
-        form.submit();
+      report = "{{ details.detection_report_list }}"
+      report  = report .replace(/&#39;|False|True|None/g, function(match) {
+	    switch(match) {
+		    case "&#39;": return '"';
+			case "False": return false;
+			case "True": return true;
+			case "None": return null;
+			default: return match;
+		}
+	  });
+	  console.log("report: ", report);
+  	  // Read the CSRF token from the meta tag
+      var csrf_token = $('meta[name="csrf-token"]').attr('content');
+      var data = {
+           report: report,
+           start_date: $("#start_date").val(),
+           end_date: $("#end_date").val()
+      }
+
+      $.ajax({
+        url: "{{ url_for('download_report') }}",
+        //<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        type: "POST", // Type of Request,
+        contentType: "application/json",
+        beforeSend: function(xhr) {
+            xhr.setRequestHeader("X-CSRFToken", csrf_token); // Set the CSRF token in the request header
+        },
+        data: JSON.stringify(data),
+        success: function (data) {
+            show_alert_model('Success', data.message);
+    },
+      // Error handling
+        error: function (xhr, status, errorThrown) {
+            if (xhr.status === 500) { // Check if the error is 500
+                var errorResponse = JSON.parse(xhr.responseText); // Parse the JSON response
+                console.log("Error Message: ", errorResponse.message);
+                show_alert_model('Error', errorResponse.message);
+            } else {
+                var errorResponse = JSON.parse(xhr.responseText);
+                // Handle other types of errors
+                show_alert_model('Error', errorResponse.message);
+                console.log("An error occurred: ", status, errorThrown);
+            }
+        }
+    });
+
+
+       /*$('#form').attr('action', '{{ url_for('download_report') }}');
+        var form_element = document.getElementById('form');
+        var report_data = document.createElement('input');
+        report_data.type = 'hidden';
+        report_data.name = 'detection_report';
+        report_data.value = {{ details.detection_report_list }};
+        form_element.appendChild(report_data);
+        form_element.action = '{{ url_for('download_report') }}';
+        form_element.submit();*/
     });
 });
 

@@ -16,7 +16,10 @@ def save_camera_frame(camera_rtsp_address, session_values_json_redis, app_config
     image_file_name = get_image_file_name(session_values_json_redis)
     camera = cv2.VideoCapture(camera_rtsp_address, cv2.CAP_FFMPEG)
     camera_frame_image_actual_path = os.path.sep.join(
-        [app_config['BASE_PATH'].rstrip('/'), app_config['IMAGE_PATH_FOR_HTML'], image_file_name])
+        [app_config['BASE_PATH'].rstrip('/'), app_config['IMAGE_PATH_FOR_HTML'].lstrip('/'), image_file_name])
+    print("base_path: ", [app_config['BASE_PATH'].rstrip('/')])
+    print("html_path: ", app_config['IMAGE_PATH_FOR_HTML'])
+    print(camera_frame_image_actual_path)
     frame_count = 0
     success = True
     while success:

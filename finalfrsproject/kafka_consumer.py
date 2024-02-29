@@ -15,7 +15,7 @@ TOPIC_NAME = 'fire'
 alerts_calculator = {}
 last_sent_timestamp = {}
 count_sent_messages = {}
-
+'''
 def start_kafka_consumer():
     try:
         consumer = KafkaConsumer(
@@ -82,3 +82,4 @@ def start_kafka_consumer():
         print("Warning!! Kafka server is not running. Please start the Kafka server.")
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
+'''

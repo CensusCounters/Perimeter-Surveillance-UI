@@ -8,48 +8,76 @@
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <input type="hidden" name="camera_id" value="{{ details.camera_id }}">
             <div class="row" id="img-vg-content-1">
-                <div class="col-md-8">
-                  <div class="form-group col-md-12">
-                    <label>Location</label>
-                    <select name="camera_location" id="camera_location" class="form-control required" onchange="get_sub_locations(this.value);">
-                     <option value="">Camera Location</option>
-                    </select>
+                <div class="col-md-12">
+                  <div class="form-group col-md-12" id="location_section">
+                    <div class="col-md-4">
+                        <label class="label">Location</label>
+                    </div>
+                   <div class="col-md-8">
+                        <select name="camera_location" id="camera_location" class="form-control required" onchange="get_sub_locations(this.value,'','');">
+                             <option value="">Camera Location</option>
+                        </select>
+                   </div>
                   </div>
                   <div class="form-group col-md-12" id="sub_location_section">
-                      <label>Sub Location</label>
-                      <select name="camera_sub_location" id="camera_sub_location" class="form-control required">
-                         <option value="">Camera Sub Location</option>
-                      </select>
+                      <div class="col-md-4">
+                         <label class="label">Sub Location</label>
+                      </div>
+                      <div class="col-md-8">
+                          <select name="camera_sub_location" id="camera_sub_location" class="form-control required">
+                            <option value="">Camera Sub Location</option>
+                          </select>
+                      </div>
                   </div>
                   <div class="form-group col-md-12" id="camera_make_section">
-                       <label>Camera Make</label>
-                      <select name="camera_make" id="camera_make" class="form-control required">
-                      <option value="">Camera Make</option>
-                      <option value="HikVision">HikVision</option>
-                      <option value="CPPlus">CPPlus</option>
-                      <option value="Dahua">Dahua</option>
-                      <option value="Other">Other</option>
-                    </select>
+                      <div class="col-md-4">
+                          <label class="label">Camera Make</label>
+                      </div>
+                      <div class="col-md-8">
+                          <select name="camera_make" id="camera_make" class="form-control required">
+                              <option value="">Camera Make</option>
+                              <option value="HikVision">HikVision</option>
+                              <option value="CPPlus">CPPlus</option>
+                              <option value="Dahua">Dahua</option>
+                              <option value="Other">Other</option>
+                          </select>
+                      </div>
                   </div>
-                <div class="form-group col-md-12" id="camera_ip_section">
-                    <label>IP address</label>
-                    <input id="camera_ip_address" name="camera_ip_address" type="text" class="form-control required" placeholder="Enter the Camera IP">
-                </div>
-                <div class="form-group col-md-12" id="camera_username_section">
-                    <label>Username</label>
-                    <input id="camera_username" name="camera_username" type="text" class="form-control" placeholder="Enter the username for the camera">
-                </div>
-                <div class="form-group col-md-12" id="camera_password_section">
-                  <label>Password</label>
-                  <input id="camera_password" name="camera_password" type="text" class="form-control" placeholder="Enter the password for the camera">
-                </div>
-                <div class="form-group col-xs-12" style="display:none">
-                  <label>RTSP Address</label>
-                  <input id="camera_rtsp_address" name="camera_rtsp_address" type="text" class="form-control required" value="Camera RTSP - {{ details.camera_rtsp_address }}">
-                </div>
-                <div class="col-xs-12 buttons text-center" id="form_button_section">
-                  <button type="button" id="submit_form" class="c-btn" style="width:75%">Submit</button>
-                </div>
+                  <div class="form-group col-md-12" id="camera_ip_section">
+                     <div class="col-md-4">
+                         <label class="label">IP address</label>
+                     </div>
+                     <div class="col-md-8">
+                          <input id="camera_ip_address" name="camera_ip_address" type="text" class="form-control required" placeholder="Enter the Camera IP">
+                     </div>
+                  </div>
+                  <div class="form-group col-md-12" id="camera_username_section">
+                      <div class="col-md-4">
+                          <label class="label">Username</label>
+                      </div>
+                      <div class="col-md-8">
+                          <input id="camera_username" name="camera_username" type="text" class="form-control" placeholder="Enter the username for the camera">
+                      </div>
+                  </div>
+                  <div class="form-group col-md-12" id="camera_password_section">
+                      <div class="col-md-4">
+                          <label class="label">Password</label>
+                      </div>
+                      <div class="col-md-8">
+                          <input id="camera_password" name="camera_password" type="text" class="form-control" placeholder="Enter the password for the camera">
+                      </div>
+                  </div>
+                  <div class="form-group col-xs-12" style="display:none">
+                      <div class="col-md-4">
+                          <label class="label">RTSP Address</label>
+                      </div>
+                      <div class="col-md-8">
+                          <input id="camera_rtsp_address" name="camera_rtsp_address" type="text" class="form-control required" value="Camera RTSP - {{ details.camera_rtsp_address }}">
+                      </div>
+                  </div>
+                  <div class="col-xs-12 buttons text-center" id="form_button_section">
+                      <button type="button" id="submit_form" class="c-btn" style="width:75%">Submit</button>
+                  </div>
                 </div>
             </div>
           </form>
@@ -58,28 +86,27 @@
   </div>
 </section>
 <script>
+ function show_alert_model(title, message) {
+    Swal.fire({
+        title: title,
+        html: '<span style="font-size: 20px;font-color:"#ffd868">' + message + '</span>',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#3085d6',
+        customClass: {
+            popup: 'my-popup-class',
+            confirmButton: 'my-confirm-button-class',
+            title: 'my-title-class',
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            console.log('OK button was clicked');
+            document.getElementById("camera_location").focus();
+        }
+    });
+}
 
-    function show_alert_model(title, message) {
-        Swal.fire({
-            title: title,
-            html: '<span style="font-size: 20px;font-color:"#ffd868">' + message + '</span>',
-            confirmButtonText: 'OK',
-            confirmButtonColor: '#3085d6',
-            customClass: {
-                popup: 'my-popup-class',
-                confirmButton: 'my-confirm-button-class',
-                title: 'my-title-class',
-            }
-        }).then((result) => {
-            if (result.isConfirmed) {
-                console.log('OK button was clicked');
-                document.getElementById("camera_location").focus();
-            }
-        });
-    }
 
-
-function get_sub_locations(location) {
+function get_sub_locations(location,sub_location,location_id) {
     console.log("location: ", location);
     if (location == '') {
         show_alert_model('Error','Please select a location to proceed');
@@ -111,15 +138,26 @@ function get_sub_locations(location) {
                 option.text = sub_location_list_json[i].sub_location_name;
                 sub_location_select_list.appendChild(option);
             }
-            selected_sub_location_from_database = "{{ details.camera_sub_location_name }}"
-            selected_location_id_from_database = "{{ details.camera_location_id }}"
-            console.log("selected_sub_location_from_database: ", selected_sub_location_from_database);
-            sub_location_select_list.value = selected_location_id_from_database + "," + selected_sub_location_from_database;
+            if (sub_location != '' && location_id != '') {
+                //selected_sub_location_from_database = "{{ details.camera_sub_location_name }}"
+                //selected_location_id_from_database = "{{ details.camera_location_id }}"
+                //console.log("sub_location: ", sub_location);
+                //let sub_location_select_list = document.getElementById("camera_sub_location");
+                sub_location_select_list.value = location_id + "," + sub_location;
+                console.log("sub_location: ", sub_location_select_list.value);
+            }
         },
-        // Error handling
-        error: function (error) {
-            console.log(`Error in sub locations ${error}`);
-            show_alert_model('Error',error);
+      // Error handling
+        error: function (xhr, status, errorThrown) {
+            if (xhr.status === 500) { // Check if the error is 500
+                var errorResponse = JSON.parse(xhr.responseText); // Parse the JSON response
+                console.log("Error Message: ", errorResponse.message);
+                show_alert_model('Error', errorResponse.message);
+            } else {
+                // Handle other types of errors
+                show_alert_model('Error', errorResponse.message);
+                console.log("An error occurred: ", status, errorThrown);
+            }
         }
     });
 }
@@ -154,13 +192,19 @@ $(document).ready(function(){
         location_select_list.value = selected_location_from_database;
       },
       // Error handling
-      error: function (response) {
-          error = jQuery.parseJSON(response)
-          show_alert_model('error', error.message)
-          console.log(`Error in get locations ${error.message}`);
-      }
+        error: function (xhr, status, errorThrown) {
+            if (xhr.status === 500) { // Check if the error is 500
+                var errorResponse = JSON.parse(xhr.responseText); // Parse the JSON response
+                console.log("Error Message: ", errorResponse.message);
+                show_alert_model('Error', errorResponse.message);
+            } else {
+                // Handle other types of errors
+                show_alert_model('Error', errorResponse.message);
+                console.log("An error occurred: ", status, errorThrown);
+            }
+        }
   });
- get_sub_locations("{{ details.camera_location_name }}")
+  get_sub_locations("{{ details.camera_location_name }}","{{ details.camera_sub_location_name }}","{{ details.camera_location_id }}")
 
 
   $.validator.addMethod('IP4Checker', function(value) {

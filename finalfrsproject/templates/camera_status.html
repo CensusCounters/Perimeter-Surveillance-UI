@@ -7,24 +7,29 @@
             {% for camera in details.camera_list %}
             <div class="card">
                 <img src="{{ camera.camera_frame_image_html_path}}">
-                <div class="card-content">
+                <div class="card-content" >
                     {% if camera.camera_status == 'Active' %}
                     <div class="light green"></div>
                     {% elif camera.camera_status == 'Not Active' %}
                     <div class="light red"></div>
                     {% endif %}
-                    <h3>{{ camera.camera_ip_address }}</h3>
-                    <p>{{ camera.camera_ip_address }}</p>
-                    <p>{{ camera.camera_status }}</p>
+                    <p>Location: {{ camera.location_name }}</p>
+                    <p>Sub Location: {{ camera.sub_location_name }}</p>
+                    <p>IP Address: {{ camera.camera_ip_address }}</p>
+                    <p>Status: {{ camera.camera_status }}</p>
                     {% if camera.camera_status == 'Active' %}
-                    <a href=# onclick="send_rtsp('{{ camera.camera_rtsp_address }}')">Click to see live stream</a>
+                        <a href=# onclick="send_rtsp('{{ camera.camera_rtsp_address }}')">Click for Live Stream</a>
+                    {% else %}
+                        <p style="color:#ffd868">No Live Stream</p>
                     {% endif %}
+
                 </div>
             </div>
             {% endfor %}
         </div>
     </form>
 </section>
+
 <script>
 	function send_rtsp(rtsp_address) {
 		alert(rtsp_address);

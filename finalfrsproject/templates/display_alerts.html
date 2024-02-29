@@ -1,0 +1,44 @@
+{% extends "layout.html" %}
+{% block content %}
+    <form id="form" action="{{ url_for('start_display') }}" method="post" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="row" id="img-vg-content-0" style="text-align: center; margin-left:50px">
+            <div class="col-xs-3"></div>
+            <div class="col-xs-6">
+                <select name="camera_rtsp_address" id="camera_rtsp_address" class="form-control" required >
+                    <option value="" style="text-align: center;">Camera IP Address</option>
+                </select>
+            </div>
+            <div class="col-xs-3"></div>
+        </div>
+        <div class="row" id="img-vg-content_1" style="margin-top:30px">
+            <div class="col-xs-7">
+                <div class="webcam_div" style="text-align: center; border: 3px solid #f29d0a; width:100%">
+                    <canvas id="canvas_picture" style="width:1000px; height:500px; object-fit: cover;"></canvas>
+                    <div id="spinner" style="position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%);">
+                        <div class="css-spinner"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-4">
+                <textarea placeholder='Enter comment...' rows="25" cols="80" style="background-color:#000; border: 3px solid #f29d0a">
+                    This is the default comment...
+                </textarea>
+            </div>
+
+        </div>
+        <div class="row" id="img-vg-content_2" style="margin-top:40px; text-align:center;">
+            <div class="col-xs-3"></div>
+            <div class="col-xs-6 buttons text-center">
+                <button type="submit" id="continue" name="continue" value="continue" class="c-btn" style="width:75%">Continue</button>
+            </div>
+            <div class="col-xs-3"></div>
+        </div>
+    </form>
+
+<script>
+	$(document).ready(function(){
+
+	});
+</script>
+{% endblock content %}

@@ -1,15 +1,16 @@
 import json
 from flask import render_template
-from finalfrsproject import sqlCommands
+from finalfrsproject import sqlCommands, app
 
 def get_handler(jwt_details, redis_conn):
     redis_parent_key = jwt_details.get('redis_parent_key')
     user_name = jwt_details.get("logged_in_user_name")
     user_type = jwt_details.get("logged_in_user_type")
+    print(redis_conn.get(redis_parent_key))
+    print(user_name)
     session_values_json_redis = json.loads(redis_conn.get(redis_parent_key))
     camera_rtsp_address = None
     camera_ip_address = None
-
     result = sqlCommands.get_rtsp_streams()
     print("********************************: ", result)
     if not result or result.get('Status') == "Fail" or len(result) == 0:

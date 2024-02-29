@@ -3,6 +3,7 @@ from flask_jwt_extended import get_jwt_identity, get_jwt, jwt_required
 from flask import render_template, jsonify
 from flask_wtf.csrf import CSRFError
 
+
 @app.errorhandler(404)
 #@jwt_required()
 def not_found_error(error):
@@ -17,6 +18,7 @@ def not_found_error(error):
     }
     print("404 error details: ", send_to_html_json)
     return render_template('404.html', details=send_to_html_json), 404
+
 
 @app.errorhandler(401)
 #@jwt_required()

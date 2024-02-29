@@ -1,4 +1,4 @@
-import json, os, sys
+import json
 from datetime import datetime, timedelta
 from flask import render_template, url_for, redirect, request, session, make_response, Response, jsonify
 from finalfrsproject import app, ALLOWED_PHOTO_EXTENSIONS, sqlCommands, jwt, routeMethods, redisCommands
@@ -25,8 +25,8 @@ from .helpers import db_request_helper as db_request_helper
 
 # Kafka 
 import threading
-from .kafka_consumer import start_kafka_consumer
-threading.Thread(target=start_kafka_consumer).start()
+#from .kafka_consumer import start_kafka_consumer
+#threading.Thread(target=start_kafka_consumer).start()
 
 # Define the custom filter
 def json_truncate(value, length=20):
@@ -62,13 +62,16 @@ def login():
     destination = session_data.get("ticket_status", "home")
 
     return login_response(user_details["Details"], destination)
-
+'''
 @app.errorhandler(Exception)
 def handle_exception(error):
     exc_type, exc_obj, exc_tb = sys.exc_info()
     fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+    fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+    #print(exc_type, "Exception in list_camera of", fname, "at line number", exc_tb.tb_lineno, ":", error)
     print(exc_type, "Exception in login of", fname, "at line number", exc_tb.tb_lineno, ":", error)
     return error_response("Error", "An unexpected error has happened. The administration has been notified. Use the link below to continue.", template='500.html', status_code=500)
+'''
 
 @app.route("/logout", methods=['GET', 'POST'])
 @jwt_required()
@@ -86,6 +89,7 @@ def logout():
 def after_request(response):
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     return response
+
 
 # handle-alert
 @app.route('/handle-alert', methods=['POST'])
@@ -148,6 +152,7 @@ def my_expired_token_callback(jwt_header, jwt_payload):
     unset_jwt_cookies(response)
     return response
 
+
 @app.route("/add_camera", methods=['GET', 'POST'])
 @jwt_required()
 def add_camera():
@@ -162,6 +167,7 @@ def add_camera():
         form = request.form
         details = process_post_request(form, jwt_details, redis_parent_key, redisCommands.redis_conn, app.config)
         return render_template('view_camera.html', details=details)
+
 
 @app.route("/view_camera", methods=['GET', 'POST'])
 @jwt_required()
@@ -198,7 +204,8 @@ def add_region_of_interest():
         send_to_html_json = {'message': message, 'page_title': "Error" if error else "Success"}
         template = '500.html' if error else 'success_page.html'
         return render_template(template, details=send_to_html_json), 500 if error else 200
-    
+
+
 # List Cameras
 @app.route("/list_camera", methods=['GET', 'POST'])
 @jwt_required()
@@ -211,7 +218,8 @@ def list_camera():
     # POST
     else:
         return list_camera_helper.handle_post_request(jwt_details, redisCommands.redis_conn, request.form)
-    
+
+
 # Edit Camera Details
 @app.route("/edit_camera_details", methods=['GET', 'POST'])
 @jwt_required()
@@ -224,6 +232,7 @@ def edit_camera_details():
     # POST
     else:
         return edit_camera_handler.post_handler(jwt_details, redisCommands.redis_conn, request.form)
+
 
 # Edit Region Of Interest
 @app.route("/edit_region_of_interest", methods=['GET', 'POST'])
@@ -273,7 +282,8 @@ def download_report():
     print("token: ", jwt_details)
     # POST
     if request.method == 'POST':
-        return download_report_helper.post_handler(jwt_details, redisCommands.redis_conn, request.form)
+        return download_report_helper.post_handler(request)
+
 
 @app.route("/start_display", methods=['GET', 'POST'])
 @jwt_required()
@@ -283,7 +293,7 @@ def start_display():
     # GET
     if request.method == 'GET':
         return start_display_helper.get_handler(jwt_details, redisCommands.redis_conn)
-    #POST
+    # POST
     else:
         return start_display_helper.post_handler(jwt_details, redisCommands.redis_conn, request.form)
     
@@ -294,6 +304,7 @@ def live_streaming():
     print("In live streaming: ", request.method)
     jwt_details = get_jwt_identity()
     return live_streaming_helper.post_handler(jwt_details, redisCommands.redis_conn)
+
 
 @app.route("/get_camera_status", methods=['GET','POST'])
 @jwt_required()
@@ -307,6 +318,7 @@ def get_camera_status():
     else:
         return get_camera_status_helper.post_handler(jwt_details, redisCommands.redis_conn, request.form)
 
+
 # Get Camera IP Addresses and Locations
 @app.route("/get_camera_ip_address_list", methods=['GET'])
 @jwt_required()
@@ -315,6 +327,7 @@ def get_camera_ip_address_list():
     jwt_details = get_jwt_identity()
     return db_request_helper.camera_ip_address_list(jwt_details, redisCommands.redis_conn)
 
+
 # Get Camera IP Addresses and Locations
 @app.route("/get_detection_category_list", methods=['GET'])
 @jwt_required()
@@ -322,6 +335,7 @@ def get_detection_category_list():
     print("In get_detection_category_list: ", request.method)
     jwt_details = get_jwt_identity()
     return db_request_helper.detection_category_list(jwt_details, redisCommands.redis_conn)
+
 
 # Get Camera IP Addresses and Locations
 @app.route("/get_location_list", methods=['GET'])
@@ -338,3 +352,15 @@ def get_sub_location_list():
     print("In get_sub_location_list: ", request.method)
     jwt_details = get_jwt_identity()
     return db_request_helper.sub_location_list(jwt_details, redisCommands.redis_conn, request)
+
+@app.route("/start_display_alerts", methods=['GET','POST'])
+@jwt_required()
+def start_display_alerts():
+    print("In display alerts: ", request.method)
+    jwt_details = get_jwt_identity()
+    #GET
+    if request.method == 'GET':
+        return render_template('display_alerts.html',details="")
+    #POST
+    else:
+        return get_camera_status_helper.post_handler(jwt_details, redisCommands.redis_conn, request.form)
