@@ -2368,7 +2368,7 @@ a:hover {
     padding: 0;
     border-radius: 15px;
 }
-#view_report, #trip_report {
+#view_report, #alert_report {
     width: 100%;    
     background: linear-gradient(to right, #03b7a5 0%, #029e8e 41%, #00665b 100%);
     border: 1px solid #03b7a5;

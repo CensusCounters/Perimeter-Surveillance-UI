@@ -22,6 +22,7 @@ from .helpers import start_display_helper as start_display_helper
 from .helpers import live_streaming_helper as live_streaming_helper
 from .helpers import get_camera_status_helper as get_camera_status_helper
 from .helpers import db_request_helper as db_request_helper
+from .helpers import alert_report_helper as alert_report_helper
 
 # Kafka 
 import threading
@@ -272,6 +273,19 @@ def detection_report():
     # POST
     else:
         return detection_report_helper.post_handler(jwt_details, redisCommands.redis_conn, request.form)
+    
+
+@app.route("/alert_report", methods=['GET', 'POST'])
+@jwt_required()
+def alert_report():
+    print("In alert report: ", request.method)
+    jwt_details = get_jwt_identity()
+    # GET
+    if request.method == 'GET':
+        return alert_report_helper.get_handler(jwt_details, redisCommands.redis_conn)
+    # POST
+    else:
+        return alert_report_helper.post_handler(jwt_details, redisCommands.redis_conn, request.form)
         
 
 @app.route("/download_report", methods=['POST'])

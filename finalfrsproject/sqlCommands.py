@@ -591,6 +591,122 @@ def get_detections_by_date(start_date, end_date, camera_id, detection_category_i
 
     return result
 
+def get_alerts_by_date(start_date, end_date, camera_id, detection_category_id):
+    global postgres_conn
+    sql = None
+    arg = None
+    cursor = None
+    result = None
+    psycopg2.extras.register_uuid()
+    print("camera_id: ", camera_id)
+    print("detection_category_id: ", detection_category_id)
+
+    try:
+        if not postgres_conn:
+            connect_to_db()
+
+        if postgres_conn.closed != 0:
+            connect_to_db()
+
+        cursor = postgres_conn.cursor()
+
+        if camera_id is None and detection_category_id is None:
+            print('All + All')
+            sql = '''select a.date_created as alert_time, l.location_name as location_name, l.sub_location_name as sub_location_name, c.camera_ip_address as camera_ip_address, 
+            dc.detection_category as detection_category, a.alert_acknowledged as alert_seen, a.alert_acknowledged_by as alert_received_by, a. alert_acknowledgement_time as alert_seen_time
+            from cameras c, locations l, alerts a, detections d, detection_categories dc
+            where a.date_created between %s and %s
+            and a.id = d.alert_id 
+            and d.camera_id = c.id
+            and c.location_id = l.id
+            and d.detection_category_id = dc.id 
+            order by a.date_created desc; '''
+            arg = [start_date, end_date]
+        elif camera_id is None and detection_category_id is not None:
+            sql = '''select a.date_created as alert_time, l.location_name as location_name, l.sub_location_name as sub_location_name, c.camera_ip_address as camera_ip_address, 
+            dc.detection_category as detection_category, a.alert_acknowledged as alert_seen, a.alert_acknowledged_by as alert_received_by, a. alert_acknowledgement_time as alert_seen_time
+            from cameras c, locations l, alerts a, detections d, detection_categories dc
+            where a.date_created between %s and %s
+            and dc.id = %s
+            and a.id = d.alert_id 
+            and d.camera_id = c.id
+            and c.location_id = l.id
+            and d.detection_category_id = dc.id 
+            order by a.date_created desc; '''
+            arg = [start_date, end_date, detection_category_id]
+        elif camera_id is not None and detection_category_id is None:
+            sql = '''select a.date_created as alert_time, l.location_name as location_name, l.sub_location_name as sub_location_name, c.camera_ip_address as camera_ip_address, 
+            dc.detection_category as detection_category, a.alert_acknowledged as alert_seen, a.alert_acknowledged_by as alert_received_by, a. alert_acknowledgement_time as alert_seen_time
+            from cameras c, locations l, alerts a, detections d, detection_categories dc
+            where a.date_created between %s and %s
+            and c.id = %s
+            and a.id = d.alert_id 
+            and d.camera_id = c.id
+            and c.location_id = l.id
+            and d.detection_category_id = dc.id 
+            order by a.date_created desc; '''
+            arg = [start_date, end_date, camera_id]
+        else:
+            sql = '''select a.date_created as alert_time, l.location_name as location_name, l.sub_location_name as sub_location_name, c.camera_ip_address as camera_ip_address, 
+            dc.detection_category as detection_category, a.alert_acknowledged as alert_seen, a.alert_acknowledged_by as alert_received_by, a. alert_acknowledgement_time as alert_seen_time
+            from cameras c, locations l, alerts a, detections d, detection_categories dc
+            where a.date_created between %s and %s
+            and c.id = %s and dc.id = %s 
+            and a.id = d.alert_id 
+            and d.camera_id = c.id
+            and c.location_id = l.id
+            and d.detection_category_id = dc.id 
+            order by a.date_created desc; '''
+            arg = [start_date, end_date, camera_id, detection_category_id]
+
+        cursor.execute(sql, arg)
+        print(cursor.mogrify(sql, arg).decode('utf=8'))
+        column_names = [desc[0] for desc in cursor.description]
+        result = cursor.fetchall()
+        alert_list = []
+        print("result: ", result)
+
+        if len(result) > 0:
+            for alert in result:
+                alert = list(alert)
+                # print(alert)
+                if alert[0] is not None:
+                    alert_time = alert[0].strftime('%d %b, %Y %I:%M %p')  # strftime('%d-%m-%Y %H:%M:%S')
+                    alert[0] = alert_time
+
+
+                if alert[7] is not None:
+                    alert_time = alert[7].strftime('%d %b, %Y %I:%M %p')  # strftime('%d-%m-%Y %H:%M:%S')
+                    alert[7] = alert_time
+
+                alert_list.append(dict(zip(column_names, alert)))
+        else:
+            print("No records found")
+            alert_list.append({
+                'alert_time': 'No records found',
+                'location_name': 'No records found',
+                'sub_location_name': 'No records found',
+                'camera_ip_address': 'No records found',
+                'detection_category': 'No records found',
+                'alert_seen': 'No records found',
+                'alert_received_by': 'No records found',
+                'alert_seen_time': 'No records found',
+            })
+
+        # print("detection_list: ", detection_list)
+        result = {"Status": "Success", "Details": alert_list}
+
+    except (Exception, psycopg2.Error) as error:
+        print("Error while executing PostgreSQL command", error)
+        result = {"Status": "Fail", "Details": error}
+
+    finally:
+        if postgres_conn:
+            cursor.close()
+            postgres_conn.close()
+
+    return result
+
 def insert_alert_detection(detection_data):
     global postgres_conn
     cursor = None

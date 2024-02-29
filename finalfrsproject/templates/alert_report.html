@@ -1,0 +1,312 @@
+{% extends "layout.html" %}
+{% block content %}
+<section class="user_vehicle_section">
+    <form action="{{ url_for('alert_report') }}" class="login" id="form" method="POST" name="form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input id="start_date" name="start_date" type="hidden">
+        <input id="end_date" name="end_date" type="hidden">
+        <input id="report" name="report" type="hidden" value="detection_report">
+        <div id="img-vg-content-1" style="text-align: center;">
+            <div class="col-xs-12">
+                <div class="searchbar-box">
+                   <input class="form-control" id="date_input" name="date_input" type="text">
+                </div>
+            </div>
+            <div class="col-xs-1"></div>
+            <div class="col-xs-5">
+                <select name="camera_identifier" id="camera_identifier" class="form-control">
+                    <option value="" style="text-align: center;">All Cameras</option>
+                </select>
+            </div>
+            <div class="col-xs-5">
+                <select name="detection_category" id="detection_category" class="form-control">
+                    <option value="" style="text-align: center;">All Detection Categories</option>
+                </select>
+            </div>
+            <div class="col-xs-1"></div>
+            <button class="c-btn" id="sbmt_button" name="sbmt_button" type="submit" style="margin-top:50px">Submit</button>
+        </div>
+    </form>
+    <div id="img-vg-content-2">
+        <div class="table-responsive">
+            <table class="table table-striped dataTables-example dataTable" style="width: 90%; margin:0 auto">
+                <thead>
+                    <tr>
+                        <th>Alert Time</th>
+                        <th>Location Name</th>
+                        <th>Sub Location Name</th>
+                        <th>Camera ID</th>
+                        <th>Detection Category</th>
+                        <th>Alert Seen</th>
+                        <th>Alert Received</th>
+                        <th>Alert Seen Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% if details.alert_report_list %}
+                {% for alert in details.alert_report_list %}
+                <tr>
+                    <td width="10%">{{ alert.alert_time }}</td>
+                    <td width="10%">{{ alert.location_name }}</td>
+                    <td width="10%">{{ alert.sub_location_name }}</td>
+                    <td width="10%">{{ alert.camera_ip_address }}</td>
+                    <td width="10%">{{ alert.detection_category }}</td>
+                    <td width="10%">{{ alert.alert_seen }}</td>
+                    <td width="10%">{{ alert.alert_received_by }}</td>
+                    <td width="10%">{{ alert.alert_seen_time }}</td>
+                </tr>
+                {% endfor %}
+
+                </tbody>
+            </table>
+        </div>
+
+        {% endif %}
+        <!-- The Modal -->
+        <div class="modal" id="myModal">
+            <!-- The Close Button -->
+            <span class="close">&times;</span>
+
+            <!-- Modal Content (The Image) -->
+            <img class="modal-content" id="img01">
+
+            <!-- Modal Caption (Image Text) -->
+            <div id="caption"></div>
+        </div>
+    </div>
+    <div style="text-align: center; margin-top: 50px">
+        <button class="c-btn" id="download" name="download" type="button">Download CSV</button>
+    </div>
+</section>
+
+<script>
+function show_alert_model(title, message) {
+    Swal.fire({
+        title: title,
+        html: '<span style="font-size: 20px;font-color:"#ffd868">' + message + '</span>',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#3085d6',
+        customClass: {
+            popup: 'my-popup-class',
+            confirmButton: 'my-confirm-button-class',
+            title: 'my-title-class',
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            console.log('OK button was clicked');
+            document.getElementById("camera_location").focus();
+        }
+    });
+}
+function show_modal(vehicle_plate_number, vehicle_image) {
+   // Get the modal
+    var modal = document.getElementById("myModal");
+    // Get the image and insert it inside the modal - use its "alt" text as a caption
+    var modalImg = document.getElementById("img01");
+    modalImg.src = vehicle_image;
+    var captionText = document.getElementById("caption");
+    modal.style.display = "block";
+    captionText.innerHTML = vehicle_plate_number//this.alt;
+    // Get the <span> element that closes the modal
+    var span = document.getElementsByClassName("close")[0];
+    // When the user clicks on <span> (x), close the modal
+    span.onclick = function() {
+        modal.style.display = "none";
+    }
+}
+
+$(document).ready(function(){
+	let camera_id, detection_category_id, camera_ip, location_name, sub_location_name;
+	{% if details.camera_id %}
+	    camera_id = "{{ details.camera_id }}";
+	{% endif %}
+    {% if details.detection_category_id %}
+        detection_category_id = "{{ details.detection_category_id }}"
+  	{% endif %}
+
+    $.ajax({
+			url: "{{ url_for('get_camera_ip_address_list') }}",
+			type: "GET", // Type of Request
+			success: function (data) {
+				let camera_select_list = document.getElementById("camera_identifier");
+				let camera_ip_list = JSON.stringify(data);
+				let camera_ip_list_json = JSON.parse(camera_ip_list);
+
+				for (var i = 0; i < camera_ip_list_json.length; i++) {
+    				camera = camera_ip_list_json[i]
+    				let option = document.createElement("option");
+                    option.value = camera.id;
+					option.text = camera.location_name + "-" + camera.sub_location_name + "-" + camera.camera_ip_address;
+					camera_select_list.appendChild(option);
+    			}
+                if (camera_id != null) {
+                    document.getElementById("camera_identifier").value = camera_id ;
+                    console.log(document.getElementById("camera_identifier").value);
+                } else {
+                    console.log('No values to set');
+                }
+			},
+			// Error handling
+			error: function (xhr, status, errorThrown) {
+                if (xhr.status === 500) { // Check if the error is 500
+                    var errorResponse = JSON.parse(xhr.responseText); // Parse the JSON response
+                    console.log("Error Message: ", errorResponse.message);
+                    show_alert_model('Error', errorResponse.message);
+                } else {
+                    // Handle other types of errors
+                    show_alert_model('Error', errorResponse.message);
+                    console.log("An error occurred: ", status, errorThrown);
+                }
+            }
+			//error: function (error) {
+	        //    show_alert_model('error', error.message)
+    		//	console.log(`Error ${error}`);
+			//}
+	});
+
+	$.ajax({
+        url: "{{ url_for('get_detection_category_list') }}",
+        type: "GET", // Type of Request
+        success: function (data) {
+            let detection_category_list = JSON.stringify(data);
+            let detection_category_list_json = JSON.parse(detection_category_list);
+            let category_select_list = document.getElementById("detection_category");
+            for (var i = 0; i < detection_category_list_json.length; i++) {
+                category = detection_category_list_json[i]
+                var option = document.createElement("option");
+                option.value = category.id;
+                option.text = category.detection_category;
+                category_select_list.appendChild(option);
+            }
+            if (detection_category_id != null) {
+                document.getElementById("detection_category").value = detection_category_id;
+            }
+        },
+        // Error handling
+        error: function (xhr, status, errorThrown) {
+            if (xhr.status === 500) { // Check if the error is 500
+                var errorResponse = JSON.parse(xhr.responseText); // Parse the JSON response
+                console.log("Error Message: ", errorResponse.message);
+                show_alert_model('Error', errorResponse.message);
+            } else {
+                // Handle other types of errors
+                show_alert_model('Error', errorResponse.message);
+                console.log("An error occurred: ", status, errorThrown);
+            }
+        }
+
+        //error: function (error) {
+        //  show_alert_model('error', error.message)
+        //  console.log(`Error in get locations ${error.message}`);
+       // }
+	});
+
+    let start_date = null
+    let end_date = null
+    $('#date_input').daterangepicker();
+    {% if details.start_date %}
+        start_date = '{{ details.start_date}}';
+        $("#start_date").val(start_date);
+        $('#date_input').data('daterangepicker').setStartDate(moment(start_date));
+    {% else %}  
+        $('#date_input').data('daterangepicker').setStartDate(moment());
+        start_date = moment().startOf('day').format('YYYY-MM-DD HH:mm:ss')
+        $("#start_date").val(start_date);
+        
+    {% endif %}
+    {% if details.end_date %}
+        end_date = '{{ details.end_date}}';
+        $('#date_input').data('daterangepicker').setEndDate(moment(end_date));
+        $("#end_date").val(end_date);
+    {% else %}  
+        $('#date_input').data('daterangepicker').setEndDate(moment());
+        end_date = moment().endOf('day').format('YYYY-MM-DD HH:mm:ss')
+        $("#end_date").val(end_date);
+    {% endif %}
+    
+    $('#date_input').daterangepicker({
+      // options here
+        ranges: {
+             'Today': [moment(), moment()],
+             'Yesterday': [moment().subtract(1,'days'), moment().subtract(1,'days')],
+             'Last 7 Days': [moment().subtract(6,'days'), moment()],
+             'Last 30 Days': [moment().subtract(29,'days'), moment()],
+             'This Month': [moment().startOf('month'), moment().endOf('month')],
+             'Last Month': [moment().subtract(1,'month').startOf('month'), moment().subtract(1,'month').endOf('month')]
+           },
+        timePicker:false,
+        autoApply:true,
+    },function(start, end, label) {
+        start_date = moment(start).startOf('day').format('YYYY-MM-DD HH:mm:ss');
+        end_date = moment(end).endOf('day').format('YYYY-MM-DD HH:mm:ss');
+        $("#start_date").val(start_date)
+        $("#end_date").val(end_date)
+    });
+    $(document).keypress(function(e) {
+        if(e.which == 13) {
+            $("#download").trigger("click");
+        }
+    });
+    $("#download").click(function() {
+      report = "{{ details.detection_report_list }}"
+      report  = report .replace(/&#39;|False|True|None/g, function(match) {
+	    switch(match) {
+		    case "&#39;": return '"';
+			case "False": return false;
+			case "True": return true;
+			case "None": return null;
+			default: return match;
+		}
+	  });
+	  console.log("report: ", report);
+  	  // Read the CSRF token from the meta tag
+      var csrf_token = $('meta[name="csrf-token"]').attr('content');
+      var data = {
+           report: report,
+           start_date: $("#start_date").val(),
+           end_date: $("#end_date").val()
+      }
+
+      $.ajax({
+        url: "{{ url_for('download_report') }}",
+        //<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        type: "POST", // Type of Request,
+        contentType: "application/json",
+        beforeSend: function(xhr) {
+            xhr.setRequestHeader("X-CSRFToken", csrf_token); // Set the CSRF token in the request header
+        },
+        data: JSON.stringify(data),
+        success: function (data) {
+            show_alert_model('Success', data.message);
+    },
+      // Error handling
+        error: function (xhr, status, errorThrown) {
+            if (xhr.status === 500) { // Check if the error is 500
+                var errorResponse = JSON.parse(xhr.responseText); // Parse the JSON response
+                console.log("Error Message: ", errorResponse.message);
+                show_alert_model('Error', errorResponse.message);
+            } else {
+                var errorResponse = JSON.parse(xhr.responseText);
+                // Handle other types of errors
+                show_alert_model('Error', errorResponse.message);
+                console.log("An error occurred: ", status, errorThrown);
+            }
+        }
+    });
+
+
+       /*$('#form').attr('action', '{{ url_for('download_report') }}');
+        var form_element = document.getElementById('form');
+        var report_data = document.createElement('input');
+        report_data.type = 'hidden';
+        report_data.name = 'detection_report';
+        report_data.value = {{ details.detection_report_list }};
+        form_element.appendChild(report_data);
+        form_element.action = '{{ url_for('download_report') }}';
+        form_element.submit();*/
+    });
+});
+
+
+</script>
+{% endblock content %}

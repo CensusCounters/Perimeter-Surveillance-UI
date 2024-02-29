@@ -31,9 +31,9 @@ def post_handler(jwt_details, redis_conn, form):
         print('redis in report_home before redirecting to get_camera_status')
         return redirect(url_for('get_camera_status'))
 
-    elif form.get('report') == 'trip_report':
-        session_values_json_redis.update({"ticket_status": "trip_report"})
+    elif form.get('report') == 'alert_report':
+        session_values_json_redis.update({"ticket_status": "alert_report"})
         redis_conn.set(redis_parent_key,
                                         json.dumps(session_values_json_redis))
-        print('redis in report_home before redirecting to trip_report')
-        return redirect(url_for('home'))
+        print('redis in report_home before redirecting to alert_report')
+        return redirect(url_for('alert_report'))
