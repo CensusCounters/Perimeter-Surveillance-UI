@@ -4,10 +4,23 @@ from flask import render_template, jsonify
 from flask_wtf.csrf import CSRFError
 
 
+@app.errorhandler(Exception)
+def handle_exception(error):
+    print(f"Error: {str(error)}")
+    send_to_html_json = {
+        #'logged_in_user':  jwt_details.get("logged_in_user_name"),
+        #'logged_in_user_type': jwt_details.get("logged_in_user_type"),
+        'message': 'System encountered a file not found error. The administration has been notified. Use the link below to continue.',
+        'page_title': 'Error'
+    }
+    print("404 error details: ", send_to_html_json)
+    return render_template('500.html', details=send_to_html_json), 500
+
 @app.errorhandler(404)
 #@jwt_required()
 def not_found_error(error):
     print("In not_found_error")
+    print(f"Error: {str(error)}")
     #jwt_details=get_jwt_identity()
     #print("token: ", jwt_details)
     send_to_html_json = {
@@ -24,6 +37,7 @@ def not_found_error(error):
 #@jwt_required()
 def not_found_error(error):
     print("In 401")
+    print(f"Error: {str(error)}")
     #jwt_details=get_jwt_identity()
     #print("token: ", jwt_details)
     send_to_html_json = {
@@ -40,6 +54,7 @@ def not_found_error(error):
 #@jwt_required()
 def internal_server_error(error):
     print("In internal server_error")
+    print(f"Error: {str(error)}")
 #    jwt_details=get_jwt_identity()
 #    print("token: ", jwt_details)
     send_to_html_json = {
@@ -55,6 +70,7 @@ def internal_server_error(error):
 @app.errorhandler(CSRFError)
 def handle_csrf_error(e):
     print("csrf error")
+    print(f"Error: {str(e)}")
     send_to_html_json = {
         'message': 'You have been logged out due to inactivity. Please login again.',
         'page_title': 'Error',
@@ -115,6 +131,7 @@ def invalid_token_callback(error):
 
 @jwt.unauthorized_loader
 def missing_token_callback(error):
+    print(f"Error: {str(error)}")
     send_to_html_json = {
         'message': 'The token has expired. Please login again.',
         'page_title': 'Error'

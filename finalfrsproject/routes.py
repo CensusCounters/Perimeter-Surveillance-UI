@@ -63,16 +63,6 @@ def login():
     destination = session_data.get("ticket_status", "home")
 
     return login_response(user_details["Details"], destination)
-'''
-@app.errorhandler(Exception)
-def handle_exception(error):
-    exc_type, exc_obj, exc_tb = sys.exc_info()
-    fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-    fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-    #print(exc_type, "Exception in list_camera of", fname, "at line number", exc_tb.tb_lineno, ":", error)
-    print(exc_type, "Exception in login of", fname, "at line number", exc_tb.tb_lineno, ":", error)
-    return error_response("Error", "An unexpected error has happened. The administration has been notified. Use the link below to continue.", template='500.html', status_code=500)
-'''
 
 @app.route("/logout", methods=['GET', 'POST'])
 @jwt_required()

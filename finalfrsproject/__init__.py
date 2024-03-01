@@ -54,5 +54,5 @@ try:
 except OSError:
    print(f"ERROR: creating directory for saved reports")
 
-from finalfrsproject import routes
+from finalfrsproject import routes, errors
 
