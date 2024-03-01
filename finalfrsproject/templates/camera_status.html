@@ -6,10 +6,14 @@
         <div class="card-container">
             {% for camera in details.camera_list %}
             <div class="card">
-                <img src="{{ camera.camera_frame_image_html_path}}">
+                {% if camera.camera_status == 'Active' %}
+                    <img src="{{ camera.camera_frame_image_html_path}}">
+                {% elif camera.camera_status == 'Not Active' %}
+                    <img src="{{ camera.inactive_rtsp_image}}">
+                {% endif %}
                 <div class="card-content" >
                     {% if camera.camera_status == 'Active' %}
-                    <div class="light green"></div>
+                        <div class="light green"></div>
                     {% elif camera.camera_status == 'Not Active' %}
                     <div class="light red"></div>
                     {% endif %}

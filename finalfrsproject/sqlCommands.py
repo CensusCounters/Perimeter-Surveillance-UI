@@ -137,11 +137,11 @@ def get_sub_location_list(location):
         print("Error while executing PostgreSQL command", error)
         result = {"Status": "Fail", "Details": error}
 
-    finally:
+    #finally:
         # closing database connection.
-        if postgres_conn:
-            cursor.close()
-            postgres_conn.close()
+        #if postgres_conn:
+        #    cursor.close()
+        #    postgres_conn.close()
     return result
 
 
@@ -356,8 +356,8 @@ def update_camera_record(camera_id, camera_make, camera_ip_address, camera_usern
                camera_region_of_interest,
                camera_associated_services, camera_roi_type, camera_location_id, camera_frame_image_actual_path,
                camera_id]
-        cursor.execute(sql, (arg))
         print(cursor.mogrify(sql, (arg)).decode('utf=8'))
+        cursor.execute(sql, (arg))
         result = cursor.fetchall()
         update_count = cursor.rowcount
         print("cameras table update count: ", update_count)

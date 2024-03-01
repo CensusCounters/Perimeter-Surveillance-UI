@@ -38,11 +38,8 @@
 		};
 		image.src = "{{ url_for('view_camera') }}";
 		document.getElementById('continue').addEventListener('click', function() {
-			alert("here 1");
 			document.getElementById('spinner').style.display = 'block';
-			alert("here 2");
 			document.getElementById('form').submit();
-			alert("here 3");
 		});
 	});
 </script>

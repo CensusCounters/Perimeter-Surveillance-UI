@@ -44,7 +44,7 @@ def post_handler(jwt_details, redis_conn, form):
         # session_values_json_redis.update({"camera_roi_type": roi_type})
         session_values_json_redis.get('camera_to_be_edited')[0].update({"camera_roi_type": roi_type})
     redis_conn.set(redis_parent_key, json.dumps(session_values_json_redis))
-    print('redis in edit_camera_details before database update: ', session_values_json_redis)
+    #print('redis in edit_camera_details before database update: ', session_values_json_redis)
     result = routeMethods.update_camera_record(session_values_json_redis.get('camera_to_be_edited'))
 
     if not result or result.get('Status') == "Fail" or result.get("Update_Count") == 0:
