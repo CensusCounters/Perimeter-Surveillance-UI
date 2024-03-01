@@ -1,6 +1,7 @@
 import json
 from ..routeMethods import build_rtsp_address
 
+
 def process_post_request(form, jwt_details, redis_parent_key, redis_conn, app_config):
     """
     Process the POST request for adding a camera.
@@ -30,11 +31,9 @@ def process_post_request(form, jwt_details, redis_parent_key, redis_conn, app_co
         "camera_password": camera_password,
         "camera_rtsp_address": camera_rtsp_address,
         "camera_associated_services": app_config["ASSOCIATED_SERVICES"],
-        "ticket_status": "add_region_of_interest",
+        "ticket_status": "add_camera",
         "logged_in_user_id": details['logged_in_user_id']
     }
-
-    # session_values_json_redis.update(details)
 
     redis_conn.set(redis_parent_key, json.dumps(session_values_json_redis))
 
@@ -44,6 +43,7 @@ def process_post_request(form, jwt_details, redis_parent_key, redis_conn, app_co
         'message': 'Loading video feed from the camera...',
         'page_title': "View Camera"
     }
+
 
 def get_initial_details(jwt_details):
     """

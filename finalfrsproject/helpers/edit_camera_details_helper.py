@@ -59,11 +59,12 @@ def post_handler(jwt_details, redis_conn, form):
         'camera_id': camera_id,
         'camera_region_of_interest': camera_region_of_interest,
         'camera_associated_services': camera_associated_services,
-        'camera_frame_image_actual_path': camera_frame_image_actual_path
+        'camera_frame_image_actual_path': camera_frame_image_actual_path,
+        "ticket_status": "edit_camera",
     }]
     session_values_json_redis.update({'camera_to_be_edited': camera_to_edit})
     session_values_json_redis.update({"message": "Loading video feed from the camera..."})
-    session_values_json_redis.update({"ticket_status": "edit_camera_details"})
+    #session_values_json_redis.update({"ticket_status": "edit_camera_details"})
     redis_conn.set(redis_parent_key, json.dumps(session_values_json_redis))
     print('redis in edit_camera_details after successful database update: ', session_values_json_redis)
     message = 'Loading video feed from the camera...'

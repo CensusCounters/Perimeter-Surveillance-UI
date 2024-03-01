@@ -19,11 +19,11 @@ def get_handler(jwt_details, redis_conn):
             'logged_in_user_type': user_type,
             'page_title': "Error"
         }
-        session_values_json_redis.update(
-            {"message": "An unexpected error occurred while retrieving rtsp streams. Please try again."})
-        session_values_json_redis.update({"ticket_status": "get_camera_status"})
-        redis_conn.set(jwt_details.get('logged_in_user_id'),
-                                        json.dumps(session_values_json_redis))
+        #session_values_json_redis.update(
+        #    {"message": "An unexpected error occurred while retrieving rtsp streams. Please try again."})
+        #session_values_json_redis.update({"ticket_status": "get_camera_status"})
+        #redis_conn.set(jwt_details.get('logged_in_user_id'),
+        #                                json.dumps(session_values_json_redis))
         print('redis in live streaming rtsp query fail: ', session_values_json_redis)
         return render_template('500.html', details=send_to_html_json)
 
@@ -58,10 +58,10 @@ def get_handler(jwt_details, redis_conn):
             'logged_in_user_type': user_type,
             'page_title': "Camera Activity Status"
         }
-        session_values_json_redis.update({"ticket_status": "get_camera_status"})
-        redis_conn.set(jwt_details.get('logged_in_user_id'),
-                                        json.dumps(session_values_json_redis))
-        print('redis in get_camera_status: ', session_values_json_redis)
+        #session_values_json_redis.update({"ticket_status": "get_camera_status"})
+        #redis_conn.set(jwt_details.get('logged_in_user_id'),
+        #                                json.dumps(session_values_json_redis))
+        print('camera list in get_camera_status get: ', camera_list)
         return render_template('camera_status.html', details=send_to_html_json)
 
 

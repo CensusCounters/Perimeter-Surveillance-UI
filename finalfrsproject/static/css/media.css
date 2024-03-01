@@ -112,7 +112,7 @@ border-color:#00ffe4;
 .list-box h4,.list-box h2,.list-box h3,.icon-spinner:before,.privacy-contain h1{
     color:#cbef02;
 }
-.list-box a,.account-links a,{
+.list-box a,.account-links a{
     color:#00ffe4;
 }
 .tutorial h2,.tutorial p{
@@ -235,7 +235,7 @@ border-color:#00ffe4;
  .list-box h4,.list-box h2,.list-box h3,.icon-spinner:before,.privacy-contain h1{
      color:#cbef02;
  }
- .list-box a,.account-links a,{
+ .list-box a,.account-links a{
      color:#00ffe4;
  }
  .tutorial h2,.tutorial p{
@@ -338,6 +338,10 @@ border-color:#00ffe4;
     .user_register_section .col-md-6 {
         max-width: 50%;
         padding: 0 15px;
+    }
+    .add-camera-section .col-md-6{
+        max-width: 100% !important;
+        padding: 0 20px !important;
     }
 }
 
@@ -563,6 +567,26 @@ border-color:#00ffe4;
         padding: 0 15px
     }
 
+    .add-camera-section .col-lg-6{
+        width: 70%;
+        padding: 0 30px;
+    }
+    .wbcam-col, .webcam_div, .canvas-container, .canvas-container canvas{
+        width: 100% !important;
+    }
+
+    .canvas-container canvas{
+        height: 100% !important;
+    } 
+
+    .canvas-container{
+        height: auto !important;
+        min-height: 390px;
+    }
+    #img-vg-content-2{
+        padding: 0 20px;
+    }
+
 
 }
 @media(max-width:991px){
@@ -622,6 +646,19 @@ border-color:#00ffe4;
     .sys-dash h3,.sys-dash p{margin-bottom:25px
         }
         .user-list.pictures .col-lg-2 {    width: 25%;}
+     
+    .add-camera-section .col-lg-6{
+        width: 100%;
+        padding: 0 30px;
+    }
+    .cam-login-section .col-md-4{
+        width: 100%;
+        max-width: 600px;
+    }
+    .cam-login-section .row{
+        margin: 0 !important;
+    }
+
 }
 
 @media(max-width:767px){
@@ -668,7 +705,6 @@ border-color:#00ffe4;
         text-align: left;
         background:transparent;
         border-radius: 0;
-
     }
     .navbar-default .navbar-right {
      margin-top: 0px;
@@ -684,6 +720,53 @@ border-color:#00ffe4;
         width: 200px;
     }
     .user-list.pictures .col-lg-2 {    width: 33%;}
+
+    .wbcam-col, .rs-face-review {
+        margin: 0 !important;
+        padding: 0 15px;
+    }
+    .canvas-container {
+        height: auto !important;
+        min-height: 260px;
+    }
+    .webcam_div{
+        margin: 0 auto;
+        max-width: 430px;
+    }
+    .faceapi-button{
+        width: 100%;
+    }
+    .faceapi-button button{
+        width: 100% !important;
+        font-size: 14px;
+        margin-top: 0 !important;
+    }
+    .title-message-header{
+        flex-direction: column;
+    }
+    .title-message-header h3{
+        margin: 0 0 10px 0;
+    }
+    .dr-search-section .searchbar-box{
+        left: auto;
+        transform: none;
+    }
+    .dr-search-section .searchbar-box input,
+    .dr-search-section .col-xs-5{
+        width: 100%;
+    }
+    .dr-search-section .searchbar-box,
+    .dr-search-section .col-xs-5{
+        margin-bottom: 20px;
+    }
+    .c-btn {
+        width: 70% !important;
+    }
+    #img-vg-content-2 table{
+        margin-top: 0 !important;
+    } 
+
+
 }
 @media(max-width:680px){
     .order-census .col-xs-5 {

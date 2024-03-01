@@ -1,6 +1,6 @@
-import json
+import json, os
 from flask import render_template
-from finalfrsproject import routeMethods
+from finalfrsproject import routeMethods, app
 
 def get_handler(jwt_details, redis_conn):
     redis_parent_key = jwt_details.get('redis_parent_key')
@@ -9,8 +9,7 @@ def get_handler(jwt_details, redis_conn):
     print('redis in edit_region_of_interest: ', session_values_json_redis)
     camera_to_edit = session_values_json_redis.get('camera_to_be_edited')
     camera_frame_image_actual_path = camera_to_edit[0].get('camera_frame_image_actual_path')
-    camera_frame_image_html_path = camera_to_edit[0].get('camera_frame_image_html_path')
-    # camera_frame_image_html_path = os.path.sep.join([app.config["IMAGE_PATH_FOR_HTML"], os.path.basename(camera_frame_image_actual_path)])
+    camera_frame_image_html_path = os.path.sep.join([app.config["IMAGE_PATH_FOR_HTML"], os.path.basename(camera_frame_image_actual_path)])
     send_to_html_json = {
         'camera_region_of_interest': camera_to_edit[0].get("camera_region_of_interest"),
         'camera_frame_image': camera_frame_image_html_path,
@@ -48,9 +47,9 @@ def post_handler(jwt_details, redis_conn, form):
     result = routeMethods.update_camera_record(session_values_json_redis.get('camera_to_be_edited'))
 
     if not result or result.get('Status') == "Fail" or result.get("Update_Count") == 0:
-        session_values_json_redis.update({"message": "System was unable to update the camera record. Please "
-                                                        "try again."})
-        session_values_json_redis.update({"ticket_status": "edit_region_of_interest"})
+        #session_values_json_redis.update({"message": "System was unable to update the camera record. Please "
+        #                                                "try again."})
+        #session_values_json_redis.update({"ticket_status": "edit_region_of_interest"})
         redis_conn.set(redis_parent_key, json.dumps(session_values_json_redis))
         print("redis in view_stream on insert new camera fail: ", session_values_json_redis)
         send_to_html_json = {
@@ -60,8 +59,8 @@ def post_handler(jwt_details, redis_conn, form):
         return render_template('500.html', details=send_to_html_json), 500
 
     else:
-        session_values_json_redis.update({"message": "Camera successfully updated in the database"})
-        session_values_json_redis.update({"ticket_status": "home"})
+        #session_values_json_redis.update({"message": "Camera successfully updated in the database"})
+        #session_values_json_redis.update({"ticket_status": "home"})
         redis_conn.set(redis_parent_key, json.dumps(session_values_json_redis))
         print('redis in edit_camera_details after successful database update: ', session_values_json_redis)
         send_to_html_json = {

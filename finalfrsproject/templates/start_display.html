@@ -36,7 +36,7 @@
 		{% if details.camera_identifier %}
 			camera_identifier_from_server = "{{ details.camera_identifier }}";
 		{% endif %}
-		alert (camera_rtsp)
+
 		$.ajax({
         url: "{{ url_for('get_camera_ip_address_list') }}",
         type: "GET", // Type of Request

@@ -50,7 +50,7 @@ def get_session_from_redis(key):
     return json.loads(session_data) if session_data else None
 
 def logout_get(jwt_details):
-    message = 'Do you want to save the current progress and start from this point next time you log in?'
+    message = 'You are successfully logged out.'
     send_to_html_json = {
         'logged_in_user': jwt_details.get("logged_in_user_name"),
         'logged_in_user_type': jwt_details.get("logged_in_user_type"),
@@ -62,24 +62,11 @@ def logout_get(jwt_details):
 def logout_post(jwt_details, request, unset_jwt_cookies):
     redis_parent_key = jwt_details.get('redis_parent_key')
     session_values_json_redis = None
-    if redisCommands.redis_conn.get(redis_parent_key) is not None:
-        session_values_json_redis = json.loads(redisCommands.redis_conn.get(redis_parent_key))
 
     form = request.form
 
     if form.get('Yes') == 'Yes':
         print('redis in logout when save redis is selected: ', session_values_json_redis)
-        response = make_response(redirect(url_for('login')))
-        unset_jwt_cookies(response)
-        return response
-
-    else:
-        redisCommands.redis_conn.delete(redis_parent_key)
-        if redisCommands.redis_conn.get(redis_parent_key) is not None:
-            session_values_json_redis = json.loads(redisCommands.redis_conn.get(redis_parent_key))
-            print('redis in logout when delete redis is selected: ', session_values_json_redis)
-        else:
-            print('redis in logout after redis is deleted')
         response = make_response(redirect(url_for('login')))
         unset_jwt_cookies(response)
         return response

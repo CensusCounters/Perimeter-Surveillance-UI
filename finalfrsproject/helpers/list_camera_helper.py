@@ -11,11 +11,9 @@ def handle_post_request(jwt_details, redis_conn, form):
     result = sqlCommands.get_camera_details(camera_id)
 
     if not result or result.get('Status') == "Fail" or len(result.get("Details")) == 0:
-        session_values_json_redis.update(
-            {
-                "message": "System was unable to retrieve camera details for camera id: " + camera_id + ". Please try again."})
-        session_values_json_redis.update({"ticket_status": "list_camera"})
-        redis_conn.set(redis_parent_key, json.dumps(session_values_json_redis))
+        #session_values_json_redis.update({"message": "System was unable to retrieve camera details for camera id: " + camera_id + ". Please try again."})
+        #session_values_json_redis.update({"ticket_status": "list_camera"})
+        #redis_conn.set(redis_parent_key, json.dumps(session_values_json_redis))
         print("get camera details failed")
         send_to_html_json = {
             'message': "System was unable to retrieve camera details for camera id: " + camera_id + ". Please try again.",

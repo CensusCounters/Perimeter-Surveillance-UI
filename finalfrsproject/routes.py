@@ -10,7 +10,7 @@ from .helpers.auth_helper import fetch_user_details, get_redis_session, login_re
 from .helpers.home_helper import process_home_form, get_home_details
 from .helpers.add_camera_helper import process_post_request, get_initial_details
 from .helpers.view_camera_helper import (get_camera_rtsp_address, save_camera_frame, update_session_values,
-                                 redirect_based_on_ticket_status, stream_camera)
+                                 stream_camera)
 from .helpers.add_region_of_interest import process_form_request, add_region_intrest_get, insert_camera_record, handle_database_response
 from .helpers import list_camera_helper as list_camera_helper
 from .helpers import edit_camera_details_helper as edit_camera_handler
@@ -59,18 +59,21 @@ def login():
     if not user_details or user_details.get('Status') == "Fail" or not user_details.get("Details"):
         return error_response("Login", "Login information incorrect. Please check the username and password entered.")
 
-    session_data = get_redis_session(user_details["Details"][2], "platform_ui")
-    destination = session_data.get("ticket_status", "home")
+    #session_data = get_redis_session(user_details["Details"][2], "platform_ui")
+    #destination = session_data.get("ticket_status", "home")
 
-    return login_response(user_details["Details"], destination)
+    return login_response(user_details["Details"], "home")
 
 @app.route("/logout", methods=['GET', 'POST'])
 @jwt_required()
 def logout():
     print("In Logout: ", request.method)
     jwt_details = get_jwt_identity()
+    redis_parent_key = jwt_details.get('redis_parent_key')
+
     # GET
     if request.method == 'GET':
+        delete_session_from_redis(redis_parent_key)
         return logout_get(jwt_details)
     # POST
     else:
@@ -109,15 +112,15 @@ def home():
     redis_parent_key = jwt_details.get('redis_parent_key')
 
     if request.method == 'GET' or (request.method == 'POST' and not request.form):
-            delete_session_from_redis(redis_parent_key)
-            print('Session data cleared from Redis.')
+        delete_session_from_redis(redis_parent_key)
+        print('Session data cleared from Redis.')
 
     if request.method == 'POST':
-        next_page = process_home_form(redis_parent_key, request.form, jwt_details)
+        next_page = process_home_form(redis_parent_key, request.form, redisCommands.redis_conn)
         if next_page:
             return redirect(url_for(next_page))
 
-    return render_template('home.html', details=get_home_details(jwt_details, request.method))
+    return render_template('home.html', details=get_home_details(redis_parent_key,jwt_details, request.method))
 
 
 # minutes of expiring. Change the timedeltas to match the needs of your application.
@@ -171,12 +174,21 @@ def view_camera():
     camera_rtsp_address = get_camera_rtsp_address(session_values_json_redis)
 
     if request.method == 'GET':
+        print("session: ", session_values_json_redis)
         return stream_camera(camera_rtsp_address)
 
+    #POST
     else:
-        paths = save_camera_frame(camera_rtsp_address, session_values_json_redis, app.config)
-        update_session_values(session_values_json_redis, paths, redisCommands.redis_conn, redis_parent_key)
-        return redirect_based_on_ticket_status(session_values_json_redis)
+        print("session: ", session_values_json_redis)
+        if session_values_json_redis.get('ticket_status') == 'add_camera':
+            print("continue in view camera for add_camera process")
+            paths = save_camera_frame(camera_rtsp_address, session_values_json_redis, app.config)
+            update_session_values(session_values_json_redis, paths, redisCommands.redis_conn, redis_parent_key)
+            return redirect(url_for('add_region_of_interest'))
+        else:
+            print("continue in view camera for edit_camera process")
+            return redirect(url_for('edit_region_of_interest'))
+
 
 
 @app.route("/add_region_of_interest", methods=['GET', 'POST'])

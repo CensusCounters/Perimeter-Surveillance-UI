@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% block content %}
-<section class="user user_register_section" style="padding-top:2em">
+<section class="user user_register_section add-camera-section" style="padding-top:2em">
   <div class="row" id="img-vg-content">
       <div class="col-md-6">
         <div class="user-form">
@@ -122,12 +122,11 @@ function get_sub_locations(location,sub_location,location_id) {
         },
         success: function (data) {
             let sub_location_select_list = document.getElementById("camera_sub_location");
-            for (var i=0; i<sub_location_select_list.length; i++) {
-                if (sub_location_select_list.options[i].value != '') {
-                    sub_location_select_list.remove(i)
-                }
+            for (var i = sub_location_select_list.options.length - 1; i >= 0; i--) {
+              if (sub_location_select_list.options[i].value != '') {
+                  sub_location_select_list.remove(i);
+              }
             }
-            console.log(sub_location_select_list.length)
             let sub_location_list = JSON.stringify(data);
             let sub_location_list_json = JSON.parse(sub_location_list);
             console.log("sub location length: " , sub_location_list_json.length)
@@ -139,10 +138,6 @@ function get_sub_locations(location,sub_location,location_id) {
                 sub_location_select_list.appendChild(option);
             }
             if (sub_location != '' && location_id != '') {
-                //selected_sub_location_from_database = "{{ details.camera_sub_location_name }}"
-                //selected_location_id_from_database = "{{ details.camera_location_id }}"
-                //console.log("sub_location: ", sub_location);
-                //let sub_location_select_list = document.getElementById("camera_sub_location");
                 sub_location_select_list.value = location_id + "," + sub_location;
                 console.log("sub_location: ", sub_location_select_list.value);
             }

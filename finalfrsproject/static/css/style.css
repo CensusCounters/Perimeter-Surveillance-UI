@@ -640,7 +640,7 @@ border:1px solid #2f2f2f
      }
     }
     
-    @keyframes "pulse" {
+    @keyframes pulse {
      0% {
         transform: scale(0);
         opacity: 0.0;
@@ -977,12 +977,11 @@ top:50%
 h5 {
     font-size: 16px;
     font-weight: lighter;
-    margin-bottom: 30px
+    margin-bottom: 30px;
     min-height: 20px;
 }
 
 .user .user-form .form-control{
-    #background: transparent;
     background: #000000;
     border-color: #2f2f2f;
     height:55px;
@@ -1070,7 +1069,7 @@ h5 {
     color: #fff;
 }
 .user .form-control:-ms-input-placeholder {
-    font-style: italic
+    font-style: italic;
     color: #fff;
 }
 /**********home page ********/
@@ -2565,7 +2564,7 @@ a:hover {
     text-align: center !important;
 }
 
-..user_vehicle_section .user_vehicle_section table th {
+.user_vehicle_section .user_vehicle_section table th {
     color: #ffd868 !important; 
     white-space: nowrap;
 }
@@ -2879,7 +2878,7 @@ a:hover {
     display:inline-block;
     padding: 8px 16px;
     background-color: #333;
-    text-decoration: none
+    text-decoration: none;
     border-radius: 4px;
     margin-top: 16px;
     color: #fff
@@ -2896,6 +2895,13 @@ a:hover {
     font-weight:"400";
     text-align: right;
     color: #ffd868;
+}
+.add-camera-section .row, .show-mood{
+    margin: 0;
+    padding: 0 15px;
+}
+.add-camera-section  .col-md-12{
+    margin-bottom: 0;
 }
 
 

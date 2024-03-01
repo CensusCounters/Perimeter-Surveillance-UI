@@ -1,13 +1,13 @@
 {% extends "layout.html" %}
 {% block content %}
-  <section class="user user_register_section" style="padding-top:2em">
+  <section class="user user_register_section add-camera-section" style="padding-top:2em">
     <div class="row" id="img-vg-content">
       <div class="col-md-6">
         <div class="user-form">
           <form id="form" action="{{ url_for('add_camera') }}" class="login" method="post">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="form-group col-md-12">
-              <select name="camera_location" id="camera_location" class="form-control" onchange="get_sub_locations(this);" required>
+              <select name="camera_location" id="camera_location" class="form-control" onchange="get_sub_locations(this.value);" required>
                <option value="">Camera Location</option>
               </select>
             </div>
@@ -63,18 +63,33 @@
       });
     }
     function get_sub_locations(location) {
+      console.log("location: ", location);
+      if (location == '') {
+          show_alert_model('Error','Please select a location to proceed');
+          return;
+      }
       $.ajax({
         url: "{{ url_for('get_sub_location_list') }}",
         type: "GET", // Type of Request
         data: {
           source: "add_camera",
           need: "locations",
-          location: location.value
+          location: location
         },
         success: function (data) {
           let sub_location_select_list = document.getElementById("camera_sub_location");
+
+          for (var i = sub_location_select_list.options.length - 1; i >= 0; i--) {
+              if (sub_location_select_list.options[i].value != '') {
+                  sub_location_select_list.remove(i);
+              }
+          }
+
+
           let sub_location_list = JSON.stringify(data);
           let sub_location_list_json = JSON.parse(sub_location_list);
+          console.log("sub location length before inserting: " , sub_location_list_json.length)
+
           for (var i = 0; i < sub_location_list_json.length; i++) {
             let option = document.createElement("option");
             option.value = sub_location_list_json[i].id+","+sub_location_list_json[i].sub_location_name;

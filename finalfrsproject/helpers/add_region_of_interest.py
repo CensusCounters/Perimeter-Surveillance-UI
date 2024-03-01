@@ -38,16 +38,16 @@ def handle_database_response(redis_conn, redis_parent_key, result):
     """Handle database operation result and update session accordingly."""
     if not result or result.get('Status') == "Fail" or result.get("Insert_Count") == 0:
         message = "System was unable to insert a camera record. Please try again."
-        ticket_status = "add_camera"
+        #ticket_status = "add_camera"
         error = True
     else:
         message = "New camera successfully added to the database."
-        ticket_status = "home"
+        #ticket_status = "home"
         error = False
     
     updates = {
         "message": message,
-        "ticket_status": ticket_status
+        #"ticket_status": ticket_status
     }
     update_session_redis(redis_conn, redis_parent_key, updates)
     return message, error

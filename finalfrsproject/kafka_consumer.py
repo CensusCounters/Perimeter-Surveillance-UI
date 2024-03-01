@@ -15,7 +15,7 @@ TOPIC_NAME = 'fire'
 alerts_calculator = {}
 last_sent_timestamp = {}
 count_sent_messages = {}
-'''
+
 def start_kafka_consumer():
     try:
         consumer = KafkaConsumer(
@@ -62,13 +62,13 @@ def start_kafka_consumer():
                     if count_sent_messages[camera_id] < MAX_ALERTS_NUMBER:
                         print(f"Send alert to socket message: {event_data}")
 
-                        # try:
-                        #     alert_id = sqlCommands.insert_alert_detection(message.value)
-                        # except Exception as e:
-                        #     print(f"Error inserting alert detection: {e}")
-                        #     alert_id = ''
-                        # print(f"Received message - alert_id: {alert_id}")
-                        # socketio.emit('new_message', {'data': message.value, 'alert_id': alert_id})
+                        try:
+                             alert_id = sqlCommands.insert_alert_detection(message.value)
+                        except Exception as e:
+                             print(f"Error inserting alert detection: {e}")
+                             alert_id = ''
+                        print(f"Received message - alert_id: {alert_id}")
+                        socketio.emit('new_message', {'data': message.value, 'alert_id': alert_id})
                         
                         last_sent_timestamp[camera_id] = message_timestamp
                         count_sent_messages[camera_id]+=1
@@ -82,4 +82,3 @@ def start_kafka_consumer():
         print("Warning!! Kafka server is not running. Please start the Kafka server.")
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
-'''

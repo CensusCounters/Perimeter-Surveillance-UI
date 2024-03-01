@@ -31,8 +31,8 @@ def get_handler(jwt_details, redis_conn):
             'logged_in_user_type': user_type,
             'page_title': "Error"
         }
-        session_values_json_redis.update({"message": "An unexpected error occurred while generating the detection report. Please try again."})
-        session_values_json_redis.update({"ticket_status": "report_home"})
+        #session_values_json_redis.update({"message": "An unexpected error occurred while generating the detection report. Please try again."})
+        #session_values_json_redis.update({"ticket_status": "report_home"})
         redisCommands.redis_conn.set(jwt_details.get('redis_parent_key'),json.dumps(session_values_json_redis))
         print('redis in detection report on generate report fail: ', session_values_json_redis)
         return render_template('report_home.html', details=send_to_html_json)
@@ -90,12 +90,12 @@ def post_handler(jwt_details, redis_conn, form):
             'logged_in_user_type': user_type,
             'page_title': "Error"
         }
-        session_values_json_redis.update(
-            {"message": "An unexpected error occurred while generating the detection report. Please try again."})
-        session_values_json_redis.update({"ticket_status": "report_home"})
-        redis_conn.set(jwt_details.get('redis_parent_key'),
-                                        json.dumps(session_values_json_redis))
-        print('redis in detection report on generate report fail: ', session_values_json_redis)
+        #session_values_json_redis.update(
+        #    {"message": "An unexpected error occurred while generating the detection report. Please try again."})
+        #session_values_json_redis.update({"ticket_status": "report_home"})
+        #redis_conn.set(jwt_details.get('redis_parent_key'),
+        #                                json.dumps(session_values_json_redis))
+        #print('redis in detection report on generate report fail: ', session_values_json_redis)
         return render_template('report_home.html', details=send_to_html_json)
         # return redirect(url_for('report_home'))
     else:

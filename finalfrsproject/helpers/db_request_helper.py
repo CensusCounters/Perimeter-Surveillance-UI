@@ -9,12 +9,12 @@ def camera_ip_address_list(jwt_details, redis_conn):
 
     result = sqlCommands.get_camera_ip_address_list()
     if not result or result.get('Status') == "Fail" or len(result.get("Details")) == 0:
-        session_values_json_redis.update(
-            {"message": "System was unable to retrieve the camera ip address list. Please try again."})
-        session_values_json_redis.update({"ticket_status": "detection_report"})
-        redis_conn.set(redis_parent_key, json.dumps(session_values_json_redis))
+        #session_values_json_redis.update(
+        #    {"message": "System was unable to retrieve the camera ip address list. Please try again."})
+        #session_values_json_redis.update({"ticket_status": "detection_report"})
+        #redis_conn.set(redis_parent_key, json.dumps(session_values_json_redis))
         print("get location list failed")
-        print("redis in add_camera on list location fail: ", session_values_json_redis)
+        #print("redis in add_camera on list location fail: ", session_values_json_redis)
         send_to_html_json = {
             'message': "System was unable to retrieve the camera list. Please try again.",
             'page_title': "Error"
@@ -34,12 +34,12 @@ def detection_category_list(jwt_details, redis_conn):
 
     result = sqlCommands.get_detection_category_list()
     if not result or result.get('Status') == "Fail" or len(result.get("Details")) == 0:
-        session_values_json_redis.update(
-            {"message": "System was unable to retrieve the detection category list. Please try again."})
-        session_values_json_redis.update({"ticket_status": "detection_report"})
-        redis_conn.set(redis_parent_key, json.dumps(session_values_json_redis))
+        #session_values_json_redis.update(
+        #    {"message": "System was unable to retrieve the detection category list. Please try again."})
+        #session_values_json_redis.update({"ticket_status": "detection_report"})
+        #redis_conn.set(redis_parent_key, json.dumps(session_values_json_redis))
         print("get detection category list failed")
-        print("redis in get detection category list fail: ", session_values_json_redis)
+        #print("redis in get detection category list fail: ", session_values_json_redis)
         send_to_html_json = {
             'message': "System was unable to retrieve the detection category list. Please try again",
             'page_title': "Error"
@@ -63,12 +63,12 @@ def location_list(jwt_details, redis_conn, request):
     result = sqlCommands.get_location_list()
 
     if not result or result.get('Status') == "Fail" or len(result.get("Locations")) == 0:
-        session_values_json_redis.update(
-            {"message": "System was unable to retrieve the location list. Please try again."})
-        session_values_json_redis.update({"ticket_status": source})
-        redis_conn.set(redis_parent_key, json.dumps(session_values_json_redis))
+        #session_values_json_redis.update(
+        #    {"message": "System was unable to retrieve the location list. Please try again."})
+        #session_values_json_redis.update({"ticket_status": source})
+        #redis_conn.set(redis_parent_key, json.dumps(session_values_json_redis))
         print("get location list failed")
-        print("redis in get_location_list failed: ", session_values_json_redis)
+        #print("redis in get_location_list failed: ", session_values_json_redis)
         send_to_html_json = {
             'message': "System was unable to retrieve the location list. Please try again",
             'page_title': "Error"
@@ -94,12 +94,12 @@ def sub_location_list(jwt_details, redis_conn, request):
     result = sqlCommands.get_sub_location_list(location)
 
     if not result or result.get('Status') == "Fail" or len(result.get("Sub_Locations")) == 0:
-        session_values_json_redis.update(
-            {"message": "System was unable to retrieve the sub location list. Please try again."})
-        session_values_json_redis.update({"ticket_status": source})
-        redis_conn.set(redis_parent_key, json.dumps(session_values_json_redis))
+        #session_values_json_redis.update(
+        #    {"message": "System was unable to retrieve the sub location list. Please try again."})
+        #session_values_json_redis.update({"ticket_status": source})
+        #redis_conn.set(redis_parent_key, json.dumps(session_values_json_redis))
         print("get location list failed")
-        print("redis in get_location_list failed: ", session_values_json_redis)
+        #print("redis in get_location_list failed: ", session_values_json_redis)
         send_to_html_json = {
             'message': "System was unable to retrieve the sub location list. Please try again",
             'page_title': "Error"

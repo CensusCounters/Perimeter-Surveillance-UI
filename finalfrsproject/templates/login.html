@@ -1,8 +1,8 @@
 {% extends "layout.html" %}
 {% block content %}
-  <section class="user user_register_section" style="padding-top:2em">
-    <div class="row" id="img-vg-content">
-      <div class="col-md-6">
+  <section class="user cam-login-section" style="padding-top:2em">
+    <div class="row" id="img-vg-content" style="display:flex; justify-content:center;">
+      <div class="col-md-4">
         <div class="user-form">
             <form id="form" action="{{ url_for('login') }}" class="login" method="post">
               <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">

@@ -9,7 +9,7 @@
                 {% if camera.camera_status == 'Active' %}
                     <img src="{{ camera.camera_frame_image_html_path}}">
                 {% elif camera.camera_status == 'Not Active' %}
-                    <img src="{{ camera.inactive_rtsp_image}}">
+                    <img src="{{ details.inactive_rtsp_image}}">
                 {% endif %}
                 <div class="card-content" >
                     {% if camera.camera_status == 'Active' %}
@@ -36,7 +36,6 @@
 
 <script>
 	function send_rtsp(rtsp_address) {
-		alert(rtsp_address);
 		var form_element = document.getElementById('form');
 		var rtsp_address_element = document.createElement('input');
 		rtsp_address_element.type = 'hidden';

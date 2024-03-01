@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% block content %}
-<section class="recognize_section" id="recognize_section">
+<section class="recognize_section add-camera-section" id="recognize_section">
 	<form id="form" action="{{ url_for('view_camera') }}" method="post" enctype="multipart/form-data">
 		<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 		<div class="row" id="img-vg-content_1">

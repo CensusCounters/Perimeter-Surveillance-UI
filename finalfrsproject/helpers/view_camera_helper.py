@@ -32,25 +32,19 @@ def save_camera_frame(camera_rtsp_address, session_values_json_redis, app_config
         [app_config["IMAGE_PATH_FOR_HTML"], os.path.basename(camera_frame_image_actual_path)])
     return camera_frame_image_actual_path, camera_frame_image_html_path
 
+
 def get_image_file_name(session_values_json_redis):
     if session_values_json_redis.get('camera_location_name') and session_values_json_redis.get('camera_ip_address'):
         return f"{session_values_json_redis.get('camera_location_name')}-{session_values_json_redis.get('camera_ip_address')}.jpg"
     return "default.jpg"
 
+
 def update_session_values(session_values_json_redis, paths, redis_conn, redis_parent_key):
     actual_path, html_path = paths
-    if session_values_json_redis.get("ticket_status") == "add_region_of_interest":
-        session_values_json_redis.update({"camera_frame_image_actual_path": actual_path, "camera_frame_image_html_path": html_path, "ticket_status": "add_region_of_interest"})
-    elif session_values_json_redis.get('camera_to_be_edited'):
-        session_values_json_redis.get('camera_to_be_edited')[0].update({"camera_frame_image_actual_path": actual_path, "camera_frame_image_html_path": html_path})
+    session_values_json_redis.update({"camera_frame_image_actual_path": actual_path, "camera_frame_image_html_path": html_path, "ticket_status": "add_region_of_interest"})
     redis_conn.set(redis_parent_key, json.dumps(session_values_json_redis))
 
-def redirect_based_on_ticket_status(session_values_json_redis):
-    if session_values_json_redis.get("ticket_status") == "add_region_of_interest":
-        return redirect(url_for('add_region_of_interest'))
-    elif session_values_json_redis.get('camera_to_be_edited'):
-        return redirect(url_for('edit_region_of_interest'))
-    
+
 def generate_frames(camera):
     while True:
         success, frame = camera.read()  # Read the camera frame
