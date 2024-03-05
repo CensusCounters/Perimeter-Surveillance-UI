@@ -1,15 +1,63 @@
 {% extends "layout.html" %}
 {% block content %}
+<script>
+	$(document).ready(function(){
+		// const message = document.getElementById("message");
+		// const canvas = document.getElementById("canvas_picture");
+		// canvas.style.width = "1000px";
+		// canvas.style.height = "500px";
+		// var context = canvas.getContext('2d');
+		// var image = new Image();
+		// image.onload = function () {
+		// 	//update the message
+		// 	message.innerText = "Success. The camera is now connected!"
+		// 	// Clear the canvas
+		// 	context.clearRect(0, 0, canvas.width, canvas.height);
+		// 	//show spinner
+		// 	document.getElementById('spinner').style.display = 'none';
+		// };
+		// image.src = "{{ url_for('video_live') }}";
+
+		var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + '/video_live');
+            
+		// Send the RTSP link to the server to start streaming
+		var rtspLink = 'rtsp://ec2-13-235-48-204.ap-south-1.compute.amazonaws.com:8554/stream1'; // Replace this with the actual dynamic link
+		socket.emit('start_stream', { 'rtsp_link': rtspLink });
+
+		socket.on('frame', function(data) {
+			var videoFrame = document.getElementById('videoFrame');
+            var loadingIndicator = document.getElementById('spinner');
+
+			videoFrame.src = 'data:image/jpeg;base64,' + data.data;
+
+			// Hide the loading indicator once the first frame is received
+			if (loadingIndicator.style.display !== 'none') {
+                    loadingIndicator.style.display = 'none';
+            }
+		});
+
+		window.onbeforeunload = function() {
+			socket.disconnect();
+		};
+
+		document.getElementById('continue').addEventListener('click', function() {
+			document.getElementById('spinner').style.display = 'block';
+			document.getElementById('form').submit();
+		});
+	});
+</script>
 <section class="recognize_section add-camera-section" id="recognize_section">
 	<form id="form" action="{{ url_for('view_camera') }}" method="post" enctype="multipart/form-data">
 		<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 		<div class="row" id="img-vg-content_1">
 			<div class="wbcam-col">
 				<div class="webcam_div" style="text-align: center; border: 3px solid #f29d0a;width:100%">
-					<canvas id="canvas_picture" style="width:1000px; height:500px; object-fit: cover; background-image: url({{ url_for('view_camera') }})"></canvas>
+					<!-- <canvas id="canvas_picture" style="width:1000px; height:500px; object-fit: cover; background-image: url({{ url_for('video_live') }})"></canvas>
+					-->
+					<img id="videoFrame" src="" style="width:1000px; height:500px; object-fit: cover;">
 					<div id="spinner" style="position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%);">
 						<div class="css-spinner"></div>
-					</div>
+					</div> 
 				</div>
 			</div>
 		</div>
@@ -20,27 +68,18 @@
 		</div>
 	</form>
 </section>
-<script>
-	$(document).ready(function(){
-		const message = document.getElementById("message");
-		const canvas = document.getElementById("canvas_picture");
-		canvas.style.width = "1000px";
-		canvas.style.height = "500px";
-		var context = canvas.getContext('2d');
-		var image = new Image();
-		image.onload = function () {
-			//update the message
-			message.innerText = "Success. The camera is now connected!"
-			// Clear the canvas
-			context.clearRect(0, 0, canvas.width, canvas.height);
-			//show spinner
-			document.getElementById('spinner').style.display = 'none';
-		};
-		image.src = "{{ url_for('view_camera') }}";
-		document.getElementById('continue').addEventListener('click', function() {
-			document.getElementById('spinner').style.display = 'block';
-			document.getElementById('form').submit();
-		});
-	});
-</script>
+
+    <!-- <script type="text/javascript">
+        var socket;
+        document.addEventListener('DOMContentLoaded', function() {
+            socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + '/video_live');
+            socket.on('frame', function(data) {
+                document.getElementById('videoFrame').src = 'data:image/jpeg;base64,' + data.data;
+            });
+        });
+
+        window.onbeforeunload = function() {
+            socket.disconnect();
+        };
+    </script> -->
 {% endblock content %}

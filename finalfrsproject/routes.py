@@ -1,7 +1,7 @@
 import json
 from datetime import datetime, timedelta
 from flask import render_template, url_for, redirect, request, session, make_response, Response, jsonify
-from finalfrsproject import app, ALLOWED_PHOTO_EXTENSIONS, sqlCommands, jwt, routeMethods, redisCommands
+from finalfrsproject import app, ALLOWED_PHOTO_EXTENSIONS, sqlCommands, jwt, routeMethods, redisCommands, socketio
 from flask_jwt_extended import create_access_token, get_jwt_identity, get_jwt, jwt_required, set_access_cookies, \
     unset_jwt_cookies
 
@@ -24,10 +24,16 @@ from .helpers import get_camera_status_helper as get_camera_status_helper
 from .helpers import db_request_helper as db_request_helper
 from .helpers import alert_report_helper as alert_report_helper
 
+import cv2
+import base64
+import eventlet
+
+
 # Kafka 
-import threading
-#from .kafka_consumer import start_kafka_consumer
-#threading.Thread(target=start_kafka_consumer).start()
+# import threading
+from .kafka_consumer import start_kafka_consumer
+# threading.Thread(target=start_kafka_consumer).start()
+eventlet.spawn(start_kafka_consumer, socketio)
 
 # Define the custom filter
 def json_truncate(value, length=20):
@@ -175,7 +181,8 @@ def view_camera():
 
     if request.method == 'GET':
         print("session: ", session_values_json_redis)
-        return stream_camera(camera_rtsp_address)
+        # return stream_camera(camera_rtsp_address)
+        return render_template('view_camera.html', details=session_values_json_redis)
 
     #POST
     else:
@@ -189,7 +196,51 @@ def view_camera():
             print("continue in view camera for edit_camera process")
             return redirect(url_for('edit_region_of_interest'))
 
+camera = None
 
+def generate_frames():
+    global camera
+    while True:
+        success, frame = camera.read()
+        if not success:
+            break
+        _, buffer = cv2.imencode('.jpg', frame)
+        encoded_frame = base64.b64encode(buffer).decode('utf-8')
+        socketio.emit('frame', {'data': encoded_frame}, namespace='/video_live')
+        eventlet.sleep(0)  # Yield to other sockets/tasks
+
+@socketio.on('start_stream', namespace='/video_live')
+def start_stream(data):
+    global camera
+    rtsp_link = data['rtsp_link']
+    if camera is not None:
+        camera.release()  # Release any previous camera resource
+    camera = cv2.VideoCapture(rtsp_link)  # Start the new camera with the RTSP link
+    eventlet.spawn(generate_frames)
+
+@socketio.on('disconnect', namespace='/video_live')
+def disconnect():
+    global camera
+    if camera is not None:
+        camera.release()
+        camera = None
+
+@app.route('/video_live')
+def video_live():
+    return jsonify({"Success", True}), 200
+
+# @socketio.on('connect', namespace='/video_live')
+# def connect():
+#     global camera
+#     camera = cv2.VideoCapture("rtsp://ec2-13-235-48-204.ap-south-1.compute.amazonaws.com:8554/stream1")  # Initialize camera
+#     eventlet.spawn(generate_frames)  # Start the frame generation in a separate green thread
+
+# @socketio.on('disconnect', namespace='/video_live')
+# def disconnect():
+#     global camera
+#     if camera is not None:
+#         camera.release()  # Release the camera resource
+#         camera = None
 
 @app.route("/add_region_of_interest", methods=['GET', 'POST'])
 @jwt_required()

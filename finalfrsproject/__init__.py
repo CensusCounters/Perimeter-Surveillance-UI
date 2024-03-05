@@ -1,3 +1,6 @@
+import eventlet
+eventlet.monkey_patch()
+
 from flask import Flask
 import os
 from flask_jwt_extended import JWTManager
@@ -6,8 +9,7 @@ from flask_wtf.csrf import CSRFProtect
 from flask_socketio import SocketIO
 
 app = Flask(__name__)
-#socketio = SocketIO(app)
-socketio = SocketIO(app, async_mode='eventlet')
+socketio = SocketIO(app, async_mode='eventlet', cors_allowed_origins="*")
 
 app.config["BASE_PATH"] = "/home/manish/Documents/Platform-UI/Platform-UI-v1/finalfrsproject"
 app.config["IMAGE_PATH_FOR_HTML"] = "/static/images/uploads"
