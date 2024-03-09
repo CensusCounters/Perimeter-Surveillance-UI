@@ -3,7 +3,7 @@
 <div id="edit_tools" style="text-align:center; width:100%; margin-bottom:20px;">
     <div style="display:inline-block; margin:0 auto;">
         <button type="button" id="rectangle_button" name="rectangle_button" value="Rectangle" class="c-btn" style="width:200px; background:#0000ff; border-color:#0000ff; color:#ffffff; margin:5px;">Rectangle</button>
-        <button type="button" id="circle_button" name="circle_button" value="Circle" class="c-btn" style="width:200px; background:#0000ff; border-color:#0000ff; color:#ffffff; margin:5px;">Circle</button>
+        <!-- <button type="button" id="circle_button" name="circle_button" value="Circle" class="c-btn" style="width:200px; background:#0000ff; border-color:#0000ff; color:#ffffff; margin:5px;">Circle</button> -->
         <button type="button" id="delete_button" name="delete_button" value="Delete" class="c-btn" style="width:200px; background:#0000ff; border-color:#0000ff; color:#ffffff; margin:5px;">Delete</button>
     </div>
 </div>
@@ -134,8 +134,8 @@
 
 		var rectangle_button = document.getElementById('rectangle_button');
 		rectangle_button.addEventListener('click',createRect);
-		var circle_button = document.getElementById('circle_button');
-		circle_button.addEventListener('click',createCircle);
+		// var circle_button = document.getElementById('circle_button');
+		// circle_button.addEventListener('click',createCircle);
 		var delete_button = document.getElementById('delete_button');
 		delete_button.addEventListener('click',deleteSelected);
 
@@ -158,7 +158,7 @@
                 width: 100,
                 height: 100,
 				stroke: "red",
-				strokeWidth: 15
+				strokeWidth: 3
             });
             fabric_canvas.add(rect);
 			fabric_canvas.setActiveObject(rect);
@@ -173,7 +173,7 @@
                 left: 200,
                 top: 200,
 				stroke: "red",
-				strokeWidth: 15
+				strokeWidth: 3
             });
             fabric_canvas.add(circle);
 			fabric_canvas.setActiveObject(circle);

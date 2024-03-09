@@ -1,0 +1,17 @@
+- id: 1
+  source: rtsp://172.17.0.1:8554/stream
+  enable_roi: false
+  roi:
+    top: 100
+    left: 200
+    bottum: 400
+    right: 500
+- id: 1
+  source: rtsp://172.17.0.1:8554/stream
+  enable_roi: false
+  roi:
+    top: 100
+    left: 200
+    bottum: 400
+    right: 500
+  

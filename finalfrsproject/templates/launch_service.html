@@ -1,0 +1,148 @@
+{% extends "layout.html" %}
+{% block content %}
+<section class="user_vehicle_section">
+    <form id="edit_camera_form" method="post" class="login">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="table-responsive" style="width: 90%; margin:0 auto">
+            <table class="table table-striped dataTables-example dataTable" id="camera-list">
+                <thead>
+                    <tr>
+                        <th>Camera Select</th>
+                        <th>Camera Location</th>
+                        <th>Camera Sub Location</th>
+                        <th>Camera IP Address</th>
+                        <th>Camera Make</th>
+                        <th>Camera RTSP Address</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% if details.camera_list %}
+                    {% for camera in details.camera_list %}
+                    <tr>
+                        <td width="10%" style="text-align: center;">
+                            <label class="container_checkbox">
+                                <input type="checkbox" id="{{camera.id}}" name="{{camera.id}}">
+                                <span class="checkmark"></span>
+                            </label>
+                        </td>
+                        <td width="10%">{{ camera.location_name }}</td>
+                        <td width="10%">{{ camera.sub_location_name }}</td>
+                        <td width="10%">{{ camera.camera_ip_address }}</td>
+                        <td width="10%">{{ camera.camera_make }}</td>
+                        <td width="30%">{{ camera.camera_rtsp_address }}</td>
+                    </tr>
+                    {% endfor %}
+                {% endif %}
+                </tbody>
+            </table>
+        </div>
+        <div class="col-xs-12 buttons text-center" id="form_button_section">
+            <button type="button" id="launch_button" class="c-btn" style="width:75%" onclick="launch()">Launch</button>
+        </div>
+    </form>
+</section>
+
+<script>
+    function editCamera(camera_id) {
+        var form_element = document.getElementById('edit_camera_form');
+        var hidden_var = document.createElement('input');
+        hidden_var.type = 'hidden';
+        hidden_var.name = 'camera_id';
+        hidden_var.value = camera_id;
+        form_element.appendChild(hidden_var);
+       form_element.submit();
+    }
+
+    function launch() {
+        var select_list = []
+        {% for camera in details.camera_list %}
+            var checkbox = document.getElementById('{{camera.id}}');
+            if(checkbox.checked) {
+                camera_region_of_interest = '{{camera.camera_region_of_interest}}';
+			    camera_region_of_interest = camera_region_of_interest.replace(/&#39;|False|True|None/g, function(match) {
+				switch(match) {
+					case "&#39;": return '"';
+					case "False": return false;
+					case "True": return true;
+					case "None": return null;
+					default: return match;
+				}
+			});
+                let c = {
+                    id: '{{camera.id}}',
+                    rtsp: '{{camera.camera_rtsp_address}}',
+                    roi: camera_region_of_interest
+                };
+                select_list.push(JSON.stringify(c))
+            }
+        {% endfor %}
+
+        console.log(select_list)
+
+        if (select_list.length === 0 || select_list.length > 8) {
+            message = "Pleeae select cameras between 1-8."
+            Swal.fire({
+                title: "Info",
+                html: '<span style="font-size: 20px;font-color:"#ffd868">' + message + '</span>',
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#3085d6',
+                customClass: {
+                    popup: 'my-popup-class',
+                    confirmButton: 'my-confirm-button-class',
+                    title: 'my-title-class',
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    console.log('OK button was clicked');
+                }
+            });
+        } else {
+            var formData = new FormData();
+
+            select_list.forEach(function(item, index) {
+                formData.append('select_list[]', item); 
+            });
+
+            // Retrieve CSRF token value
+            var csrf_token = $('input[name="csrf_token"]').val();
+
+            $.ajax({
+                url: "{{ url_for('launch_service') }}", 
+                type: "POST",
+                data: formData,
+                processData: false, 
+                contentType: false,
+                beforeSend: function(xhr) {
+                    // Send CSRF token as a header
+                    xhr.setRequestHeader('X-CSRFToken', csrf_token);
+                },
+                success: function(data) {
+                    console.log("camera launch success")
+                    message = data.message
+                    Swal.fire({
+                        title: "Info",
+                        html: '<span style="font-size: 20px;font-color:"#ffd868">' + message + '</span>',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#3085d6',
+                        allowOutsideClick: false,
+                        customClass: {
+                            popup: 'my-popup-class',
+                            confirmButton: 'my-confirm-button-class',
+                            title: 'my-title-class',
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            console.log('OK button was clicked');
+                            window.location.href = "{{ url_for('home') }}";
+                        }
+                    });
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                }
+            });
+        }
+        
+    }
+</script>
+{% endblock content %}

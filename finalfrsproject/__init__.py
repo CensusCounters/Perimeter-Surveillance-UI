@@ -11,7 +11,7 @@ from flask_socketio import SocketIO
 app = Flask(__name__)
 socketio = SocketIO(app, async_mode='eventlet', cors_allowed_origins="*")
 
-app.config["BASE_PATH"] = "/home/manish/Documents/Platform-UI/Platform-UI-v1/finalfrsproject"
+app.config["BASE_PATH"] = "/root/Projects/Perimeter-Surveillance-UI/finalfrsproject"
 app.config["IMAGE_PATH_FOR_HTML"] = "/static/images/uploads"
 app.config["KNOWN_DETECTION_PATH_FOR_HTML"] = "/static/images/detections"
 app.config["SAVED_REPORTS"] = "/static/reports/"
@@ -21,7 +21,7 @@ app.config["INACTIVE_RTSP_IMAGE"] = "/static/images/camera-not-available.jpg"
 
 ALLOWED_PHOTO_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp'}
 #app.config["POSTGRESQL_URL"] = "census-postgres_db"
-app.config["POSTGRESQL_URL"] = "172.17.0.1"
+app.config["POSTGRESQL_URL"] = "localhost"
 
 app.config["JWT_COOKIE_SECURE"] = False
 app.config["JWT_TOKEN_LOCATION"] = ["cookies"]

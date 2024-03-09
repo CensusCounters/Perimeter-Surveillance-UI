@@ -4,69 +4,269 @@
 <head>
   <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
-    <script type="text/javascript" charset="utf-8">
-      $(document).ready(function(){
-        // const socket = io('http://localhost:5000', {
-        //   transports: ['websocket']
-        // });
-        // alert(location.protocol + '//' + document.domain + ':' + location.port)
-        var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
-        // socket.emit('event_data', { 'rtsp_link': "rtsp_link" });
-        socket.on('connect', function() {
-                console.log('Connected to WebSocket');
+<style>
+  .alert-card-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+  }
+  
+  .alert-card {
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    max-width: 600px;
+    width: 100%;
+  }
+  
+  .alert-card img {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+  }
+  
+  .alert-card-content {
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
+  }
+  
+  .alert-card-row {
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    margin: 10px 0;
+  }
+  
+  .alert-card-label {
+    color: #ffd868;
+    font-size: 22px;
+    width: 40%; /* Adjust the width of the label column */
+    text-align: right;
+  }
+  
+  .alert-card-value {
+    color: #dddddd;
+    font-size: 18px;
+    font-weight: bold;
+    text-align: left; /* Align the text to the left */
+    width: 60%; /* Adjust the width of the value column */
+    margin-left: 10px;
+  }
+  </style>
+
+<!-- <style>
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-10px); }
+    40%, 80% { transform: translateX(10px); }
+  }
+  
+  .swal2-popup {
+    animation: shake 0.6s; /* Adjust the duration as needed */
+  }
+  </style> -->
+
+<script type="text/javascript" charset="utf-8">
+  $(document).ready(function(){
+
+    let alertQueue = [];
+    let isAlertShowing = false;
+
+    function showAlert(title, text) {
+        alertQueue.push({title, text});
+        if (!isAlertShowing) {
+            displayNextAlert();
+        }
+        console.log("alertQueue length -", alertQueue.length)
+    }
+
+    function displayNextAlert() {
+        if (alertQueue.length === 0) {
+            isAlertShowing = false;
+            return;
+        }
+        isAlertShowing = true;
+        const {title, text} = alertQueue.shift(); // Get the next alert from the queue
+        
+        const alertSound = new Audio('/static/alert_sound.mp3'); // Update the path to your audio file
+        // alertSound.play()
+        //   .then(() => console.log('Playback succeeded'))
+        //   .catch((error) => console.error('Playback failed', error));
+        // alertSound.muted = true;
+        alertSound.play() // Attempt to play it muted on page load.
+          .then(() => {
+            alertSound.muted = false;
+          })
+        .catch(error => console.error('Error trying to autoplay muted audio', error));
+
+        Swal.fire({
+          title: "<h3 style='color: red; font-weight: bold'>Detection Alert</h3>",
+          html: text,
+          confirmButtonText: 'OK',
+          confirmButtonColor: '#3085d6',
+          allowOutsideClick: false,
+          width: 550,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                console.log('OK button was clicked');
+                isAlertShowing = false;
+                setTimeout(() => {
+                  if (alertQueue.length > 0) {
+                    displayNextAlert(); 
+                  }
+                }, 500);
+            }
         });
-        socket.on('event_data', function(msg) {
-          console.log(msg);
-          data = msg.data;
-          const formattedData = `
-              <div>
-                  <p><b>Time:</b> ${data.time}</p>
-                  <p><b>Camera IP:</b> ${data.camera_ip}</p>
-                  <p><b>Location:</b> ${data.location}</p>
-                  <p><b>Detection Type:</b> ${data.detection_type}</p>
-                  <p><b>Detection Model:</b> ${data.detection_model}</p>
-                  <p><b>Alarm:</b> ${data.alarm ? 'Yes' : 'No'}</p>
-                  <p><b>Image Location:</b> ${data.image_location}</p>
+      }
+
+    var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
+    // socket.emit('event_data', { 'rtsp_link': "rtsp_link" });
+    socket.on('connect', function() {
+            console.log('Connected to WebSocket');
+    });
+    socket.on('event_data', function(msg) {
+      console.log(msg);
+      data = msg.data;
+
+      const image_path = "/static/images/uploads/Unit 3-8.8.8.8.jpg";
+
+      const formattedData = `
+        <div class="alert-card-container">
+          <div class="alert-card">
+            <img src='${image_path}' onclick="window.open('${image_path}')" alt="Detection Image">
+            <div class="alert-card-content">
+              <div class="alert-card-row">
+                <span class="alert-card-label">Time:</span>
+                <span class="alert-card-value">${data.timestamp}</span>
               </div>
-          `;
+              <div class="alert-card-row">
+                <span class="alert-card-label">Location:</span>
+                <span class="alert-card-value">${data.location}</span>
+              </div>
+              <div class="alert-card-row">
+                <span class="alert-card-label">Sub Location:</span>
+                <span class="alert-card-value">${data.sub_location}</span>
+              </div>
+              <div class="alert-card-row">
+                <span class="alert-card-label">IP Address:</span>
+                <span class="alert-card-value">${data.camera_ip}</span>
+              </div>
+              <div class="alert-card-row">
+                <span class="alert-card-label">Detection Type:</span>
+                <span class="alert-card-value">${data.detection_type}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
 
-          Swal.fire({
-              title: 'Alert Info',
-              html: formattedData,
-              confirmButtonText: 'OK',
-              confirmButtonColor: '#3085d6',
-              allowOutsideClick: false,
-              customClass: {
-                  popup: 'my-popup-class',
-                  confirmButton: 'my-confirm-button-class',
-                  title: 'my-title-class',
-              }
-          }).then((result) => {
-              if (result.isConfirmed) {
-                  console.log('OK button was clicked');
-                  console.log("alert_id :::::: ", msg.alert_id)
+      showAlert('Alert Info', formattedData)
+    });
+  });
 
-                  $.ajax({
-                      type: "POST",
-                      url: "/handle-alert", 
-                      contentType: "application/json",
-                      data: JSON.stringify({ "alert_id": msg.alert_id }),
-                      beforeSend: function(xhr) {
-                        // Include CSRF token as header
-                        xhr.setRequestHeader("X-CSRFToken", $('meta[name="csrf-token"]').attr('content'));
-                    },
-                      success: function(response) {
-                          console.log(response.message);
-                      },
-                      error: function(xhr, status, error) {
-                          console.error("Error in sending alert_id: ", error);
-                      }
-                  });
-              }
-          });
-        });
-      });
 </script>
+
+<!-- <script type="text/javascript" charset="utf-8">
+  $(document).ready(function() {
+    let alertQueue = [];
+    let isAlertShowing = false;
+
+    function showAlert(title, text) {
+      alertQueue.push({title, text});
+      if (!isAlertShowing) {
+          displayNextAlert();
+      }
+      console.log("alertQueue length -", alertQueue.length)
+    }
+
+    function displayNextAlert() {
+      if (alertQueue.length === 0) {
+          isAlertShowing = false;
+          return;
+      }
+      isAlertShowing = true;
+      const {title, text} = alertQueue.shift(); // Get the next alert from the queue
+      
+      const alertSound = new Audio('/static/alert_sound.mp3'); // Update the path to your audio file
+      // alertSound.play()
+      //   .then(() => console.log('Playback succeeded'))
+      //   .catch((error) => console.error('Playback failed', error));
+      // alertSound.muted = true;
+      alertSound.play() // Attempt to play it muted on page load.
+        .then(() => {
+          alertSound.muted = false;
+        })
+      .catch(error => console.error('Error trying to autoplay muted audio', error));
+
+      Swal.fire({
+        title: "<h3 style='color: red; font-weight: bold'>Detection Alert</h3>",
+        html: text,
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#3085d6',
+        allowOutsideClick: false,
+        width: 550,
+      }).then((result) => {
+          if (result.isConfirmed) {
+              console.log('OK button was clicked');
+              isAlertShowing = false;
+              setTimeout(() => {
+                if (alertQueue.length > 0) {
+                  displayNextAlert(); 
+                }
+              }, 500);
+          }
+      });
+    }
+
+    // Simulate data reception with a timer
+    setInterval(function() {
+      const simulatedData = {
+        timestamp: '09 Mar, 2024 02:21 PM', 
+        camera_ip: '192.168.1.1', 
+        location: 'Office', 
+        sub_location: 'Office', 
+        detection_type: 'MOD', 
+        image_location: '/images/Office/MOD_1709974308.jpg'
+      };
+      
+      const image_path = "/static/images/uploads/Unit 3-8.8.8.8.jpg";
+
+      const formattedData = `
+      <div class="alert-card-container">
+        <div class="alert-card">
+          <img src='${image_path}' onclick="window.open('${image_path}')" alt="Detection Image">
+          <div class="alert-card-content">
+            <div class="alert-card-row">
+              <span class="alert-card-label">Time:</span>
+              <span class="alert-card-value">${simulatedData.timestamp}</span>
+            </div>
+            <div class="alert-card-row">
+              <span class="alert-card-label">Location:</span>
+              <span class="alert-card-value">${simulatedData.location}</span>
+            </div>
+            <div class="alert-card-row">
+              <span class="alert-card-label">Sub Location:</span>
+              <span class="alert-card-value">${simulatedData.sub_location}</span>
+            </div>
+            <div class="alert-card-row">
+              <span class="alert-card-label">IP Address:</span>
+              <span class="alert-card-value">${simulatedData.camera_ip}</span>
+            </div>
+            <div class="alert-card-row">
+              <span class="alert-card-label">Detection Type:</span>
+              <span class="alert-card-value">${simulatedData.detection_type}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      `;
+
+      showAlert('Alert Info', formattedData);
+    }, 5*1000); 
+  });
+</script> -->
 <section class="user add-end-button-section">
   <div class="container-fluid" style="width:90%;">
     <form id="form" action="{{ url_for('home') }}" enctype="multipart/form-data" method="post">

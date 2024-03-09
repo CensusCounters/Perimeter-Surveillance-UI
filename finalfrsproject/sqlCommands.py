@@ -612,51 +612,60 @@ def get_alerts_by_date(start_date, end_date, camera_id, detection_category_id):
 
         if camera_id is None and detection_category_id is None:
             print('All + All')
-            sql = '''select a.date_created as alert_time, l.location_name as location_name, l.sub_location_name as sub_location_name, c.camera_ip_address as camera_ip_address, 
-            dc.detection_category as detection_category, a.alert_acknowledged as alert_seen, a.alert_acknowledged_by as alert_received_by, a. alert_acknowledgement_time as alert_seen_time
-            from cameras c, locations l, alerts a, detections d, detection_categories dc
-            where a.date_created between %s and %s
-            and a.id = d.alert_id 
-            and d.camera_id = c.id
-            and c.location_id = l.id
-            and d.detection_category_id = dc.id 
-            order by a.date_created desc; '''
+            sql = '''SELECT a.date_created AS alert_time, l.location_name AS location_name, l.sub_location_name AS
+            sub_location_name, c.camera_ip_address AS camera_ip_address,  dc.detection_category AS detection_category,
+            a.alert_acknowledged AS alert_seen, COALESCE(u.user_name, 'none') AS alert_received_by,
+            a.alert_acknowledgement_time AS alert_seen_time, a.action_status as action_status, a.id as id FROM alerts a
+            JOIN detections d ON a.id = d.alert_id
+            JOIN cameras c ON d.camera_id = c.id
+            JOIN locations l ON c.location_id = l.id
+            JOIN detection_categories dc ON d.detection_category_id = dc.id
+            LEFT JOIN users u ON a.alert_acknowledged_by = u.id
+            WHERE a.date_created BETWEEN %s AND %s
+            ORDER BY a.date_created DESC;'''
             arg = [start_date, end_date]
         elif camera_id is None and detection_category_id is not None:
-            sql = '''select a.date_created as alert_time, l.location_name as location_name, l.sub_location_name as sub_location_name, c.camera_ip_address as camera_ip_address, 
-            dc.detection_category as detection_category, a.alert_acknowledged as alert_seen, a.alert_acknowledged_by as alert_received_by, a. alert_acknowledgement_time as alert_seen_time
-            from cameras c, locations l, alerts a, detections d, detection_categories dc
-            where a.date_created between %s and %s
-            and dc.id = %s
-            and a.id = d.alert_id 
-            and d.camera_id = c.id
-            and c.location_id = l.id
-            and d.detection_category_id = dc.id 
-            order by a.date_created desc; '''
+            sql = '''SELECT a.date_created AS alert_time, l.location_name AS location_name, l.sub_location_name AS
+            sub_location_name, c.camera_ip_address AS camera_ip_address,  dc.detection_category AS detection_category,
+            a.alert_acknowledged AS alert_seen, COALESCE(u.user_name, 'none') AS alert_received_by,
+            a.alert_acknowledgement_time AS alert_seen_time, a.action_status as action_status, a.id as id FROM alerts a
+            JOIN detections d ON a.id = d.alert_id
+            JOIN cameras c ON d.camera_id = c.id
+            JOIN locations l ON c.location_id = l.id
+            JOIN detection_categories dc ON d.detection_category_id = dc.id
+            LEFT JOIN users u ON a.alert_acknowledged_by = u.id
+            WHERE a.date_created BETWEEN %s AND %s
+            AND dc.id = %s
+            ORDER BY a.date_created DESC;'''
             arg = [start_date, end_date, detection_category_id]
         elif camera_id is not None and detection_category_id is None:
-            sql = '''select a.date_created as alert_time, l.location_name as location_name, l.sub_location_name as sub_location_name, c.camera_ip_address as camera_ip_address, 
-            dc.detection_category as detection_category, a.alert_acknowledged as alert_seen, a.alert_acknowledged_by as alert_received_by, a. alert_acknowledgement_time as alert_seen_time
-            from cameras c, locations l, alerts a, detections d, detection_categories dc
-            where a.date_created between %s and %s
-            and c.id = %s
-            and a.id = d.alert_id 
-            and d.camera_id = c.id
-            and c.location_id = l.id
-            and d.detection_category_id = dc.id 
-            order by a.date_created desc; '''
+            sql = '''SELECT a.date_created AS alert_time, l.location_name AS location_name, l.sub_location_name AS
+            sub_location_name, c.camera_ip_address AS camera_ip_address,  dc.detection_category AS detection_category,
+            a.alert_acknowledged AS alert_seen, COALESCE(u.user_name, 'none') AS alert_received_by,
+            a.alert_acknowledgement_time AS alert_seen_time, a.action_status as action_status, a.id as id FROM alerts a
+            JOIN detections d ON a.id = d.alert_id
+            JOIN cameras c ON d.camera_id = c.id
+            JOIN locations l ON c.location_id = l.id
+            JOIN detection_categories dc ON d.detection_category_id = dc.id
+            LEFT JOIN users u ON a.alert_acknowledged_by = u.id
+            WHERE a.date_created BETWEEN %s AND %s
+            AND c.id = %s
+            ORDER BY a.date_created DESC;'''
             arg = [start_date, end_date, camera_id]
         else:
-            sql = '''select a.date_created as alert_time, l.location_name as location_name, l.sub_location_name as sub_location_name, c.camera_ip_address as camera_ip_address, 
-            dc.detection_category as detection_category, a.alert_acknowledged as alert_seen, a.alert_acknowledged_by as alert_received_by, a. alert_acknowledgement_time as alert_seen_time
-            from cameras c, locations l, alerts a, detections d, detection_categories dc
-            where a.date_created between %s and %s
-            and c.id = %s and dc.id = %s 
-            and a.id = d.alert_id 
-            and d.camera_id = c.id
-            and c.location_id = l.id
-            and d.detection_category_id = dc.id 
-            order by a.date_created desc; '''
+            sql = '''SELECT a.date_created AS alert_time, l.location_name AS location_name, l.sub_location_name AS
+            sub_location_name, c.camera_ip_address AS camera_ip_address,  dc.detection_category AS detection_category,
+            a.alert_acknowledged AS alert_seen, COALESCE(u.user_name, 'none') AS alert_received_by,
+            a.alert_acknowledgement_time AS alert_seen_time, a.action_status as action_status, a.id as id FROM alerts a
+            JOIN detections d ON a.id = d.alert_id
+            JOIN cameras c ON d.camera_id = c.id
+            JOIN locations l ON c.location_id = l.id
+            JOIN detection_categories dc ON d.detection_category_id = dc.id
+            LEFT JOIN users u ON a.alert_acknowledged_by = u.id
+            WHERE a.date_created BETWEEN %s AND %s
+            AND c.id = %s 
+            AND dc.id = %s
+            ORDER BY a.date_created DESC;'''
             arg = [start_date, end_date, camera_id, detection_category_id]
 
         cursor.execute(sql, arg)
@@ -800,6 +809,53 @@ def update_alert_detection(alertId, acknowledged_by):
 
         postgres_conn.commit()
         print("Alert infromation updated successfully.")
+
+    except (Exception, psycopg2.Error) as error:
+        print("Error while executing PostgreSQL command", error)
+        result = {"Status": "Fail", "Insert_Count": 0, "Details": error}
+
+    finally:
+        # closing database connection.
+        if postgres_conn:
+            cursor.close()
+            postgres_conn.close()
+            # print("PostgreSQL connection is closed")
+    return result
+
+
+def update_alert_status(alertId, action_status):
+    global postgres_conn
+    cursor = None
+    result = None
+    psycopg2.extras.register_uuid()
+    print("sql insert stmt: ")
+    try:
+        if not postgres_conn:
+            connect_to_db()
+
+        if postgres_conn.closed != 0:
+            connect_to_db()
+
+        cursor = postgres_conn.cursor()
+        print("sql insert stmt: ")
+
+        print("alert_id :::: ", alertId)
+        alert_action_status = action_status  
+
+        cursor.execute("""
+            UPDATE Alerts
+            SET 
+                action_status = %s
+            WHERE id = %s;
+            """, (
+                alert_action_status, 
+                alertId  
+            )
+        )
+
+        postgres_conn.commit()
+        print("Alert infromation updated successfully.")
+        result = {"Status": "Success"}
 
     except (Exception, psycopg2.Error) as error:
         print("Error while executing PostgreSQL command", error)

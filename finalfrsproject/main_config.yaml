@@ -1,0 +1,49 @@
+batch_size: 5
+- id: 1
+  source: rtsp://ec2-13-235-48-204.ap-south-1.compute.amazonaws.com:8554/stream1
+  enable_roi: true
+  roi:
+  - top: 100
+    left: 100
+    bottum: 200
+    right: 200
+  - top: 200
+    left: 200
+    bottum: 300
+    right: 300
+- id: 2
+  source: rtsp://ec2-13-235-48-204.ap-south-1.compute.amazonaws.com:8554/stream1
+  enable_roi: true
+  roi:
+  - top: 100
+    left: 100
+    bottum: 200
+    right: 200
+- id: 11
+  source: rtsp://ec2-13-235-48-204.ap-south-1.compute.amazonaws.com:8554/stream1
+  enable_roi: true
+  roi:
+  - top: 100
+    left: 100
+    bottum: 200
+    right: 200
+- id: 12
+  source: rtsp://ec2-13-235-48-204.ap-south-1.compute.amazonaws.com:8554/stream1
+  enable_roi: true
+  roi:
+  - top: 100
+    left: 100
+    bottum: 200
+    right: 200
+  - top: 200
+    left: 200
+    bottum: 300
+    right: 300
+- id: 13
+  source: rtsp://ec2-13-235-48-204.ap-south-1.compute.amazonaws.com:8554/stream1
+  enable_roi: true
+  roi:
+  - top: 200
+    left: 200
+    bottum: 300
+    right: 300

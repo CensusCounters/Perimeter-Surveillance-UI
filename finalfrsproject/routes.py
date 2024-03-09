@@ -23,6 +23,7 @@ from .helpers import live_streaming_helper as live_streaming_helper
 from .helpers import get_camera_status_helper as get_camera_status_helper
 from .helpers import db_request_helper as db_request_helper
 from .helpers import alert_report_helper as alert_report_helper
+from .helpers import launch_service_helper as launch_service_helper
 
 import cv2
 import base64
@@ -272,6 +273,18 @@ def list_camera():
     # POST
     else:
         return list_camera_helper.handle_post_request(jwt_details, redisCommands.redis_conn, request.form)
+    
+@app.route("/launch_service", methods=['GET', 'POST'])
+@jwt_required()
+def launch_service():
+    print("In launch_service: ", request.method)
+    jwt_details = get_jwt_identity()
+    # GET
+    if request.method == 'GET':
+        return launch_service_helper.handle_get_request(jwt_details, redisCommands.redis_conn)
+    # POST
+    else:
+        return launch_service_helper.handle_post_request(jwt_details, redisCommands.redis_conn, request.form)
 
 
 # Edit Camera Details
@@ -286,6 +299,39 @@ def edit_camera_details():
     # POST
     else:
         return edit_camera_handler.post_handler(jwt_details, redisCommands.redis_conn, request.form)
+    
+@app.route('/update_alert_status', methods=['POST'])
+@jwt_required()
+def update_alert_status():
+    jwt_details = get_jwt_identity()
+    redis_parent_key = jwt_details.get('redis_parent_key')
+    print("redis_parent_key: ", redis_parent_key)
+    user_name = jwt_details.get("logged_in_user_name")
+    user_type = jwt_details.get("logged_in_user_type")
+    session_values_json_redis = json.loads(redisCommands.redis_conn.get(redis_parent_key))
+
+    data = request.json
+    alert_id = data.get('alertId')
+    new_status = data.get('newStatus')
+    print(alert_id)
+    print(new_status)
+
+    result = sqlCommands.update_alert_status(alert_id, new_status)
+    if not result or result.get('Status') == "Fail":
+        print("Alert status update failed")
+        send_to_html_json = {
+            'message': "An unexpected error occurred while generating the alert report. "
+                       "The administration has been notified. Use the link below to continue.",
+            'logged_in_user': user_name,
+            'logged_in_user_type': user_type,
+            'page_title': "Error"
+        }
+        session_values_json_redis.update({"message": "An unexpected error occurred while generating the alert report. Please try again."})
+        redisCommands.redis_conn.set(jwt_details.get('redis_parent_key'),json.dumps(session_values_json_redis))
+        print('redis in detection report on generate report fail: ', session_values_json_redis)
+        return jsonify(send_to_html_json), 500
+    else:
+        return jsonify({'status': 'success', 'message': 'Status updated successfully'})
 
 
 # Edit Region Of Interest

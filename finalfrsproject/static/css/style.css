@@ -2772,7 +2772,7 @@ a:hover {
 .swal2-popup {
     background-color: #000 !important;
     color: #ffd868 !important;
-    width: 1000px !important;
+    /* width: 1000px !important; */
     border: 1px solid #ffd868 !important;
 }
 .swal2-styled.swal2-confirm {
@@ -2815,6 +2815,7 @@ a:hover {
     justify-content: center;
     flex-wrap: wrap;
     /*margin-top:100px;*/
+    padding: 0 100px;
 }
 .card {
     width:325px;

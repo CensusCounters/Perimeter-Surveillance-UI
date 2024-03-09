@@ -78,6 +78,11 @@
 	            <a href="{{ url_for('start_display') }}" style="text-decoration: underline;">Live Video</a>
 	          {% endif %}
 	        </div>
+			<div style="margin-top:30px;text-align:center;font-size:2rem;font-weight: 200;">
+				{% if details.logged_in_user %}
+				  <a href="{{ url_for('launch_service') }}" style="text-decoration: underline;">Launch</a>
+				{% endif %}
+			  </div>
 	      </div>
 		  <div class="col-md-1">
 	        <div style="margin-top:30px;text-align:center;font-size:2rem;font-weight: 200;">

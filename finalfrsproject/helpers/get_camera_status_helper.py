@@ -50,10 +50,16 @@ def get_handler(jwt_details, redis_conn):
 
         print("camera_list")
 
+        message = ""
+        if(len(camera_list) == 0):
+            message = "No records are available."
+        else:
+            message = "Please click on the cards to see live streaming from the camera."
+
         send_to_html_json = {
             'camera_list': camera_list,
             'inactive_rtsp_image': app.config["INACTIVE_RTSP_IMAGE"],
-            'message': "Please click on the cards to see live streaming from the camera.",
+            'message': message,
             'logged_in_user': user_name,
             'logged_in_user_type': user_type,
             'page_title': "Camera Activity Status"
