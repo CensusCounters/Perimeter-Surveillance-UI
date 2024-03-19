@@ -72,6 +72,7 @@ def post_handler(jwt_details, redis_conn, form):
         'logged_in_user': jwt_details.get("logged_in_user_name"),
         'logged_in_user_type': jwt_details.get("logged_in_user_type"),
         'message': message,
+        'camera_rtsp_address': camera_rtsp_address,
         'page_title': "View Camera"
     }
     return render_template('view_camera.html', details=send_to_html_json)

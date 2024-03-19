@@ -167,6 +167,7 @@ def add_camera():
     else:
         form = request.form
         details = process_post_request(form, jwt_details, redis_parent_key, redisCommands.redis_conn, app.config)
+        print("view_camera details - " , details)
         return render_template('view_camera.html', details=details)
 
 
@@ -182,8 +183,9 @@ def view_camera():
 
     if request.method == 'GET':
         print("session: ", session_values_json_redis)
-        # return stream_camera(camera_rtsp_address)
-        return render_template('view_camera.html', details=session_values_json_redis)
+        #socketio.emit()
+        return stream_camera(camera_rtsp_address)
+        # return render_template('view_camera.html', details=session_values_json_redis)
 
     #POST
     else:

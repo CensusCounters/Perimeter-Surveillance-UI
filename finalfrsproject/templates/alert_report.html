@@ -33,31 +33,31 @@
                 <thead>
                     <tr>
                         <th>Alert Time</th>
-                        <th>Location Name</th>
-                        <th>Sub Location Name</th>
+                        <th>Location</th>
+                        <th>Sub Location</th>
                         <th>Camera ID</th>
-                        <th>Detection Category</th>
-                        <th>Alert Received</th>
-                        <th>Action Status</th>
+                        <th>Detection ID</th>
+                        <th>Alert Received by</th>
+                        <th>Action Status (Click on the row to update status)</th>
                     </tr>
                 </thead>
                 <tbody>
                 {% if details.alert_report_list %}
                 {% for alert in details.alert_report_list %}
-                <tr>
+                <tr class="update-status-link" data-alert-id="{{ alert.id }}" data-action-status="{{ alert.action_status }}">
                     <td width="10%">{{ alert.alert_time }}</td>
                     <td width="10%">{{ alert.location_name }}</td>
                     <td width="10%">{{ alert.sub_location_name }}</td>
                     <td width="10%">{{ alert.camera_ip_address }}</td>
                     <td width="10%">{{ alert.detection_category }}</td>
-                    <td width="10%">{{ alert.alert_received_by }}</td>
-                    <td width="40%">
+                    <td width="20%">{{ alert.alert_received_by }} at {{ alert.alert_seen_time }}</td>
+                    <td width="30%">
                         {% if alert.action_status == 'none' %}
                             None
                         {% else %}
                             {{ alert.action_status }}
                         {% endif %}
-                        <br /><a href="javascript:void(0)" class="update-status-link" data-alert-id="{{ alert.id }}">Update Status</a>
+                        <!-- <br /><a href="javascript:void(0)" class="update-status-link" data-alert-id="{{ alert.id }}">Update Status</a> -->
                     </td>
                 </tr>
                 {% endfor %}
@@ -84,7 +84,7 @@
                 <form id="statusForm">
                     <span class="close">&times;</span>
                     <input type="hidden" id="alertId" name="alertId">
-                    <div class="form-group col-md-12"></div>
+                    <div class="form-group col-md-12" style="text-align: center; color: #ffd868 !important;"> <h3>Update Status</h3></div>
                     <div class="form-group col-md-12">
                         <textarea id="newStatus" name="newStatus" class="form-control required" rows="4" cols="50"></textarea>
                         <!-- <textarea id="newStatus" name="newStatus" class="form-control required" placeholder="Action Status"> -->
@@ -336,6 +336,7 @@ $(document).ready(function(){
         $('#statusModal').show();
         // Set alert ID in the hidden form field
         $('#alertId').val($(this).data('alert-id'));
+        $('#newStatus').val($(this).data('action-status'));
     });
 
     $('#statusForm').submit(function(e){

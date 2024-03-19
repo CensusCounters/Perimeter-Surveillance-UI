@@ -1,5 +1,13 @@
 {% extends "layout.html" %}
 {% block content %}
+
+
+  <head>
+	<link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
+
+	<!-- If you'd like to support IE8 (for Video.js versions prior to v7) -->
+	<!-- <script src="https://vjs.zencdn.net/ie8/1.1.2/videojs-ie8.min.js"></script> -->
+  </head>
 <script>
 	$(document).ready(function(){
 		// const message = document.getElementById("message");
@@ -18,32 +26,38 @@
 		// };
 		// image.src = "{{ url_for('video_live') }}";
 
-		var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + '/video_live');
+	// 	var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + '/video_live');
             
-		// Send the RTSP link to the server to start streaming
-		var rtspLink = 'rtsp://ec2-13-235-48-204.ap-south-1.compute.amazonaws.com:8554/stream1'; // Replace this with the actual dynamic link
-		socket.emit('start_stream', { 'rtsp_link': rtspLink });
+	// 	// Send the RTSP link to the server to start streaming
+	// 	var rtspLink = 'rtsp://ec2-13-235-48-204.ap-south-1.compute.amazonaws.com:8554/stream1'; 
+	// 	socket.emit('start_stream', { 'rtsp_link': rtspLink });
 
-		socket.on('frame', function(data) {
-			var videoFrame = document.getElementById('videoFrame');
-            var loadingIndicator = document.getElementById('spinner');
+	// 	socket.on('frame', function(data) {
+	// 		var videoFrame = document.getElementById('videoFrame');
+    //         var loadingIndicator = document.getElementById('spinner');
 
-			videoFrame.src = 'data:image/jpeg;base64,' + data.data;
+	// 		videoFrame.src = 'data:image/jpeg;base64,' + data.data;
 
-			// Hide the loading indicator once the first frame is received
-			if (loadingIndicator.style.display !== 'none') {
-                    loadingIndicator.style.display = 'none';
-            }
-		});
+	// 		// Hide the loading indicator once the first frame is received
+	// 		if (loadingIndicator.style.display !== 'none') {
+    //                 loadingIndicator.style.display = 'none';
+    //         }
+	// 	});
 
-		window.onbeforeunload = function() {
-			socket.disconnect();
-		};
+	// 	window.onbeforeunload = function() {
+	// 		socket.disconnect();
+	// 	};
 
-		document.getElementById('continue').addEventListener('click', function() {
-			document.getElementById('spinner').style.display = 'block';
-			document.getElementById('form').submit();
-		});
+	// 	document.getElementById('continue').addEventListener('click', function() {
+	// 		document.getElementById('spinner').style.display = 'block';
+	// 		document.getElementById('form').submit();
+	// 	});
+	// $(document).ready(function() {
+    //         // Refresh image every 100 milliseconds to get the latest frame
+    //         setInterval(function() {
+    //             $("#videoFrame").attr("src", "/video_feed?" + new Date().getTime());
+    //         }, 100);
+    //     });
 	});
 </script>
 <section class="recognize_section add-camera-section" id="recognize_section">
@@ -52,9 +66,19 @@
 		<div class="row" id="img-vg-content_1">
 			<div class="wbcam-col">
 				<div class="webcam_div" style="text-align: center; border: 3px solid #f29d0a;width:100%">
-					<!-- <canvas id="canvas_picture" style="width:1000px; height:500px; object-fit: cover; background-image: url({{ url_for('video_live') }})"></canvas>
+					<!-- <canvas id="canvas_picture" style="width:1000px; height:500px; object-fit: cover; background-image: url({{ url_for('view_camera') }})"></canvas>
 					-->
-					<img id="videoFrame" src="" style="width:1000px; height:500px; object-fit: cover;">
+					<!-- <img id="videoFrame" src="/view_camera" style="width:1000px; height:500px; object-fit: cover;"> -->
+					<video
+						id="my_video_1"
+						class="video-js vjs-default-skin"
+						controls
+						preload="auto"
+						width="640"
+						height="268"
+						data-setup='{}'>
+						<source src="/view_camera" type="application/x-mpegURL">
+						</video>
 					<div id="spinner" style="position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%);">
 						<div class="css-spinner"></div>
 					</div> 
@@ -68,7 +92,10 @@
 		</div>
 	</form>
 </section>
-
+<script>
+	// var player = videojs('my_video_1');
+	// player.play();
+</script>
     <!-- <script type="text/javascript">
         var socket;
         document.addEventListener('DOMContentLoaded', function() {
@@ -82,4 +109,5 @@
             socket.disconnect();
         };
     </script> -->
+	<script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
 {% endblock content %}

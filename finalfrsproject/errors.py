@@ -13,7 +13,7 @@ def handle_exception(error):
         'message': 'System encountered a file not found error. The administration has been notified. Use the link below to continue.',
         'page_title': 'Error'
     }
-    print("404 error details: ", send_to_html_json)
+    # print("404 error details: ", send_to_html_json)
     return render_template('500.html', details=send_to_html_json), 500
 
 @app.errorhandler(404)

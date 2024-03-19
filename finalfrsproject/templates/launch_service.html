@@ -12,6 +12,7 @@
                         <th>Camera Sub Location</th>
                         <th>Camera IP Address</th>
                         <th>Camera Make</th>
+                        <th>Associated Services</th>
                         <th>Camera RTSP Address</th>
                     </tr>
                 </thead>
@@ -29,7 +30,12 @@
                         <td width="10%">{{ camera.sub_location_name }}</td>
                         <td width="10%">{{ camera.camera_ip_address }}</td>
                         <td width="10%">{{ camera.camera_make }}</td>
-                        <td width="30%">{{ camera.camera_rtsp_address }}</td>
+                        <td width="10%">
+                            {% for item in camera.camera_associated_services_descriptions %}
+                                {{ item }}  
+                            {% endfor %}  
+                        </td>
+                        <td width="20%">{{ camera.camera_rtsp_address }}</td>
                     </tr>
                     {% endfor %}
                 {% endif %}
@@ -60,17 +66,31 @@
             if(checkbox.checked) {
                 camera_region_of_interest = '{{camera.camera_region_of_interest}}';
 			    camera_region_of_interest = camera_region_of_interest.replace(/&#39;|False|True|None/g, function(match) {
-				switch(match) {
-					case "&#39;": return '"';
-					case "False": return false;
-					case "True": return true;
-					case "None": return null;
-					default: return match;
-				}
-			});
+                    switch(match) {
+                        case "&#39;": return '"';
+                        case "False": return false;
+                        case "True": return true;
+                        case "None": return null;
+                        default: return match;
+                    }
+			    });
+                associated_services = '{{ camera.camera_associated_services_descriptions }}';
+                associated_services = associated_services.replace(/&#39;|False|True|None/g, function(match) {
+                    switch(match) {
+                        case "&#39;": return '"';
+                        case "False": return false;
+                        case "True": return true;
+                        case "None": return null;
+                        default: return match;
+                    }
+			    });
                 let c = {
                     id: '{{camera.id}}',
                     rtsp: '{{camera.camera_rtsp_address}}',
+                    ip_address: '{{ camera.camera_ip_address }}',
+                    location: '{{ camera.sub_location_name }}',
+                    sub_location: '{{ camera.camera_rtsp_address }}',
+                    associated_services: associated_services,
                     roi: camera_region_of_interest
                 };
                 select_list.push(JSON.stringify(c))

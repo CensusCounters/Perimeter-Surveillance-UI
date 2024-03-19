@@ -4,9 +4,50 @@ from finalfrsproject import app
 import os, shutil
 import json
 from datetime import datetime
+import pytz
+# from tzlocal import get_localzone
 
 postgres_conn = None
 
+def local_to_utc(local_time):
+    # Make it timezone-aware (replace 'local_timezone' with your local timezone)
+    local_timezone = pytz.timezone('Asia/Kolkata')
+    local_aware = local_timezone.localize(local_time)
+    # Convert to UTC
+    utc_time = local_aware.astimezone(pytz.utc)
+    return utc_time
+
+def utc_to_local(utc_dt):
+    # Specify your local timezone
+    local_timezone = pytz.timezone('Asia/Kolkata') 
+    # Convert UTC datetime to local datetime
+    local_time = utc_dt.astimezone(local_timezone)
+    return local_time
+
+# def local_to_utc():
+#     # Get the local timezone from the system
+#     local_timezone = get_localzone()
+#     # Get the current local time
+#     local_time = datetime.now(local_timezone)
+#     # Convert to UTC
+#     utc_time = local_time.astimezone(pytz.utc)
+#     return utc_time
+
+# def local_to_utc(naive_local_datetime):
+#     # Get the local timezone from the system
+#     local_timezone = get_localzone()
+#     # Make the naive datetime timezone-aware in the local timezone
+#     aware_local_datetime = local_timezone.localize(naive_local_datetime)
+#     # Convert to UTC
+#     utc_datetime = aware_local_datetime.astimezone(pytz.utc)
+#     return utc_datetime
+
+# def utc_to_local(utc_dt):
+#     # Get the local timezone from the system
+#     local_timezone = get_localzone()
+#     # Convert UTC datetime to local datetime
+#     local_time = utc_dt.astimezone(local_timezone)
+#     return local_time
 
 def connect_to_db():
     global postgres_conn
@@ -395,10 +436,40 @@ def get_camera_list():
 
         cursor = postgres_conn.cursor()
         # print('Created cursor')
-        sql = '''Select c.camera_make, c.camera_ip_address, c.camera_username, c.camera_password, c.camera_rtsp_address, 
-                c.camera_region_of_interest, c.camera_associated_services, c.location_id, l.location_name, 
-                c.camera_frame_image_actual_path, c.id, l.sub_location_name 
-                from cameras c, locations l where c.location_id = l.id;'''
+        # sql = '''Select c.camera_make, c.camera_ip_address, c.camera_username, c.camera_password, c.camera_rtsp_address, 
+        #         c.camera_region_of_interest, c.camera_associated_services, c.location_id, l.location_name, 
+        #         c.camera_frame_image_actual_path, c.id, l.sub_location_name 
+        #         from cameras c, locations l where c.location_id = l.id;'''
+
+        sql = '''
+             SELECT c.camera_make, 
+                    c.camera_ip_address, 
+                    c.camera_username, 
+                    c.camera_password, 
+                    c.camera_rtsp_address,
+                    c.camera_region_of_interest, 
+                    ARRAY_AGG(dm.description) AS camera_associated_services_descriptions,
+                    c.location_id, 
+                    l.location_name, 
+                    c.camera_frame_image_actual_path, 
+                    c.id, 
+                    l.sub_location_name
+                FROM cameras c
+                JOIN locations l ON c.location_id = l.id
+                LEFT JOIN LATERAL unnest(c.camera_associated_services) AS cas(id) ON TRUE
+                LEFT JOIN detection_models dm ON dm.id = cas.id
+                GROUP BY c.camera_make, 
+                        c.camera_ip_address, 
+                        c.camera_username, 
+                        c.camera_password, 
+                        c.camera_rtsp_address,
+                        c.camera_region_of_interest, 
+                        c.location_id, 
+                        l.location_name, 
+                        c.camera_frame_image_actual_path, 
+                        c.id, 
+                        l.sub_location_name;
+        '''
         arg = []
         cursor.execute(sql, (arg))
         print(cursor.mogrify(sql, (arg)).decode('utf=8'))
@@ -548,7 +619,8 @@ def get_detections_by_date(start_date, end_date, camera_id, detection_category_i
             for detection in result:
                 detection = list(detection)
                 if detection[1] is not None:
-                    detection_time = detection[1].strftime('%d %b, %Y %I:%M %p')  # strftime('%d-%m-%Y %H:%M:%S')
+                    d_time = utc_to_local(detection[1])
+                    detection_time = d_time.strftime('%d %b, %Y %I:%M %p')  # strftime('%d-%m-%Y %H:%M:%S')
                     detection[1] = detection_time
 
                 if detection[6] is not None:
@@ -557,7 +629,8 @@ def get_detections_by_date(start_date, end_date, camera_id, detection_category_i
                     detection[6] = detection_image_location
 
                 if detection[8] is not None:
-                    alert_time = detection[8].strftime('%d %b, %Y %I:%M %p')  # strftime('%d-%m-%Y %H:%M:%S')
+                    a_time = utc_to_local(detection[8])
+                    alert_time = a_time.strftime('%d %b, %Y %I:%M %p')  # strftime('%d-%m-%Y %H:%M:%S')
                     detection[8] = alert_time
 
                 detection_list.append(dict(zip(column_names, detection)))
@@ -680,12 +753,14 @@ def get_alerts_by_date(start_date, end_date, camera_id, detection_category_id):
                 alert = list(alert)
                 # print(alert)
                 if alert[0] is not None:
-                    alert_time = alert[0].strftime('%d %b, %Y %I:%M %p')  # strftime('%d-%m-%Y %H:%M:%S')
+                    a_time = utc_to_local(alert[0])
+                    alert_time = a_time.strftime('%d %b, %Y %I:%M %p')  # strftime('%d-%m-%Y %H:%M:%S')
                     alert[0] = alert_time
 
 
                 if alert[7] is not None:
-                    alert_time = alert[7].strftime('%d %b, %Y %I:%M %p')  # strftime('%d-%m-%Y %H:%M:%S')
+                    a_s_time = utc_to_local(alert[7])
+                    alert_time = a_s_time.strftime('%d %b, %Y %I:%M %p')  # strftime('%d-%m-%Y %H:%M:%S')
                     alert[7] = alert_time
 
                 alert_list.append(dict(zip(column_names, alert)))
@@ -746,11 +821,11 @@ def insert_alert_detection(detection_data):
 
         cursor.execute("""
             INSERT INTO Detections (
-            date_created, camera_id, frame_id, detection_model, detection_category,
+            camera_id, frame_id, detection_model, detection_category,
             bounding_boxes, detection_image_location, was_alert_sent, alert_id
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s);
             """, (
-            detection_data['time'], detection_data['camera_id'], detection_data['frame_id'],
+            detection_data['camera_id'], detection_data['frame_id'],
             detection_data['detection_model'], detection_data['detection_type'],
             bounding_boxes_json, detection_data['image_location'], True, alert_id
             ))
@@ -790,7 +865,7 @@ def update_alert_detection(alertId, acknowledged_by):
         print("alert_id :::: ", alertId)
         alert_acknowledged = True
         alert_acknowledged_by = acknowledged_by  
-        alert_acknowledgement_time = datetime.now()
+        alert_acknowledgement_time = local_to_utc(datetime.now)
 
         cursor.execute("""
             UPDATE Alerts

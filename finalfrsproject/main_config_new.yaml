@@ -1,0 +1,46 @@
+sensor0:
+  enable: 1
+  type: Camera
+  id: 192.1.1.1
+  location: 45.293701447;-75.8303914499;48.1557479338
+  description: rtsp://ec2-13-235-48-204.ap-south-1.compute.amazonaws.com:8554/stream1
+  coordinate: 5.2;10.1;11.2
+place0:
+  enable: 1
+  id: 0
+  type: Kitchen
+  name: rtsp://ec2-13-235-48-204.ap-south-1.compute.amazonaws.com:8554/stream1
+  location: 30.32;-40.55;100.0
+  coordinate: 1.0;2.0;3.0
+  place-sub-field1: 192.168.1.172
+  place-sub-field2: empty2
+  place-sub-field3: empty3
+analytics1:
+  enable: 1
+  id: 1
+  description: Person Detection
+  source: IP camera
+  version: 1.0
+analytics2:
+  enable: 1
+  id: 2
+  description: Movement Detection
+  source: IP camera
+  version: 1.0
+sensor1:
+  enable: 1
+  type: Camera
+  id: 2.2.2.2
+  location: 45.293701447;-75.8303914499;48.1557479338
+  description: rtsp://ec2-13-235-48-204.ap-south-1.compute.amazonaws.com:8554/stream1
+  coordinate: 5.2;10.1;11.2
+place1:
+  enable: 1
+  id: 1
+  type: Pillar 4
+  name: rtsp://ec2-13-235-48-204.ap-south-1.compute.amazonaws.com:8554/stream1
+  location: 30.32;-40.55;100.0
+  coordinate: 1.0;2.0;3.0
+  place-sub-field1: 192.168.1.172
+  place-sub-field2: empty2
+  place-sub-field3: empty3

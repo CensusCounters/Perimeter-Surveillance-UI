@@ -1,0 +1,31 @@
+<!-- video_stream_component.html -->
+<div class="webcam_div" style="text-align: center; border: 3px solid #f29d0a;width:100%">
+    <img id="videoFrame" src="" style="width:1000px; height:500px; object-fit: cover;">
+    <div id="spinner" style="position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%);">
+        <div class="css-spinner"></div>
+    </div> 
+</div>
+
+<script>
+    $(document).ready(function() {
+        var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + '/video_live');
+        var rtspLink = "{{ details.camera_rtsp_address }}";
+        console.log("rtspLink - ", rtspLink)
+        socket.emit('start_stream', { 'rtsp_link': rtspLink });
+
+        socket.on('frame', function(data) {
+            var videoFrame = document.getElementById('videoFrame');
+            var loadingIndicator = document.getElementById('spinner');
+
+            videoFrame.src = 'data:image/jpeg;base64,' + data.data;
+
+            if (loadingIndicator.style.display !== 'none') {
+                loadingIndicator.style.display = 'none';
+            }
+        });
+
+        window.onbeforeunload = function() {
+            socket.disconnect();
+        };
+    });
+</script>

@@ -10,7 +10,7 @@ def process_post_request(form, jwt_details, redis_parent_key, redis_conn, app_co
     redis_parent_key = jwt_details.get('redis_parent_key')
     details = json.loads(redis_conn.get(redis_parent_key))
 
-    print("details::::::", details)
+    # print("details::::::", details)
 
     camera_location_name = form.get('camera_location')
     camera_sub_location_name = form.get('camera_sub_location').split(",")[1]
@@ -40,6 +40,7 @@ def process_post_request(form, jwt_details, redis_parent_key, redis_conn, app_co
     return {
         'logged_in_user': jwt_details.get("logged_in_user_name"),
         'logged_in_user_type': jwt_details.get("logged_in_user_type"),
+        "camera_rtsp_address": camera_rtsp_address,
         'message': 'Loading video feed from the camera...',
         'page_title': "View Camera"
     }

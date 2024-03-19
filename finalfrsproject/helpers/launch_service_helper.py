@@ -2,6 +2,76 @@ import json
 from finalfrsproject import sqlCommands, app
 from flask import render_template, redirect, url_for, jsonify
 import yaml
+import re
+
+# Function to generate sensor entry
+def generate_sensor_entry(camera, index):
+    return {
+        f"sensor{index}": {
+            "enable": 1,
+            "type": "Camera",
+            "id": camera["ip_address"],
+            "location": "45.293701447;-75.8303914499;48.1557479338",
+            "description": camera["rtsp"],
+            "coordinate": "5.2;10.1;11.2"
+        }
+    }
+
+# Function to generate place entry
+def generate_place_entry(camera, index):
+    return {
+        f"place{index}": {
+            "enable": 1,
+            "id": index,
+            "type": camera["location"],
+            "name": camera["sub_location"],
+            "location": "30.32;-40.55;100.0",
+            "coordinate": "1.0;2.0;3.0",
+            "place-sub-field1": "192.168.1.172",
+            "place-sub-field2": "empty2",
+            "place-sub-field3": "empty3"
+        }
+    }
+
+def generate_analytics_entries(camera, start_index=1):
+    analytics_entries = {}
+    associated_services = json.loads(camera["associated_services"])
+    for i, service in enumerate(associated_services, start=start_index):
+        analytics_entries[f"analytics{i}"] = {
+            "enable": 1,
+            "id": i,
+            "description": service,
+            "source": "IP camera",
+            "version": 1.0
+        }
+    print("Whats happening--- ")
+    return analytics_entries, start_index + len(associated_services)
+
+
+def generate_config_yaml(data, output_file_path):
+    if not data:
+        return "No data available to generate YAML file."
+    
+    combined_yaml = {}
+    analytics_index = 1
+
+    for index, camera in enumerate(data):
+        combined_yaml.update(generate_sensor_entry(camera, index))
+        combined_yaml.update(generate_place_entry(camera, index))
+        analytics_entries, analytics_index = generate_analytics_entries(camera, analytics_index)
+        combined_yaml.update(analytics_entries)
+
+    # Convert to YAML
+    yaml_output = yaml.dump(combined_yaml, sort_keys=False, allow_unicode=True)
+
+    pattern = re.compile(r'(?m)^((sensor|place|analytics)\d+:)')
+    yaml_output = pattern.sub(r'\n\1', yaml_output)
+
+
+    with open(output_file_path, 'w') as file:
+        file.write(yaml_output)
+
+    return f"YAML file generated successfully at: {output_file_path}"
 
 def generate_new_yaml_file(data, output_file_path):
     if not data:
@@ -83,8 +153,11 @@ def handle_post_request(jwt_details, redis_conn, form):
 
     print("parsed items: ", parsed_items)
     output_file_path = app.config["BASE_PATH"] +'/main_config.yaml'
+    output_file_path_new = app.config["BASE_PATH"] +'/msgconv_config.yaml'
 
     result_status = generate_new_yaml_file(parsed_items, output_file_path)
+
+    result_status = generate_config_yaml(parsed_items, output_file_path_new)
 
     return jsonify({'message': result_status}), 200
 
@@ -118,7 +191,7 @@ def handle_get_request(jwt_details, redis_conn):
             'message': 'Please click anywhere on the row to edit the camera settings.',
             'page_title': 'Edit Camera'
         }
-        print("details: ", send_to_html_json)
+        # print("details: ", send_to_html_json)
         session_values_json_redis.update({"ticket_status": "list_camera"})
         redis_conn.set(redis_parent_key, json.dumps(session_values_json_redis))
 
